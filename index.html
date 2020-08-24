@@ -1,0 +1,252 @@
+<html>
+<head>
+    <title>DMD Ingestion Demo</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="configure.js" type="text/javascript"></script>
+    <script src="scripts.js" type="text/javascript"></script>
+    <script src="https://kit.fontawesome.com/21e504d9f4.js" crossorigin="anonymous" SameSite="None" Secure></script>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DMD Ingestion Demo</h1>
+            <div class="breadcrumb">
+                <ol>
+                    <script>
+                        let sectCnt = 0;
+                        const sects = sections.map((sect) => {
+                            let li = $('<li class="' + sect.name + '" onClick="changeSection(null, ' + sectCnt + ')">' + sect.desc + '</li>');
+                            if (sect.name === 'description') {
+                                li.addClass('active');
+                            } else {
+                                li.hide();
+                            }
+                            $('.breadcrumb ol').append(li);
+                            sectCnt++;
+                        })
+                    </script>
+                </ol>
+            </div>
+        </header>
+
+        <sections>
+
+            <!-- section 1: description -->
+            <section id="section_description" class="active">
+                <h3>
+                    You may enter an Ingestion Name and/or a Project Name. We will compare the name(s) to other Ingestions in our database to ensure there are no duplicates.
+                </h3>
+                <form name="description" onSubmit="return false;">
+                    <div class="form-groups">
+                        <!-- ingestion name -->
+                        <div class="form-group">
+                            <label>Ingestion Name</label>
+                            <input type="text" name="name" id="name" onBlur="thisIngestion.pipeline.name = this.value" />
+                        </div>
+                        <!-- project name -->
+                        <div class="form-group">
+                            <label>Project Name</label>
+                            <input type="text" name="project_name" id="project_name" onBlur="thisIngestion.pipeline.project_name = this.value" />
+                        </div>
+                    </div>
+                    <h3 class="new">This is a new Ingestion. Please select at least one Tag and include some brief comments to describe the use for this Ingestion.</h3>
+                    <h3 class="match">We have found an existing Ingestion that matches the name(s) you entered. Please evaluate the tags and comments below. If this is the correct Ingestion you are looking for, you may edit them and continue.<br /><br />
+                    If you do not wish to edit this Ingestion, please type in different names and submit it again.</h3>
+                    <!-- tags -->
+                    <div class="form-group tags">
+                        <label>Tags</label>
+                        <div id="tag-options-box" class="tag-options-box">
+                            <script>
+                                let options = tagOptions.map((option) => {
+                                    const opt = $('<div class="list-item"><input id="chk_' + option.value + '" name="tag-options" class="tag-option" type="checkbox" value="' + option.value + '" onChange="updateTags()" /><label class="side-label" for="chk_' + option.value + '">' + option.name + ' <span>[' + option.value + ']</span></label></div>');
+                                    $('#tag-options-box').append(opt);
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <!-- comments -->
+                    <div class="form-group comments">
+                        <label>Comments</label>
+                        <textarea id="comments" name="comments" onBlur="thisIngestion.pipeline.comments = this.value"></textarea>
+                    </div>
+                    <div class="actions">
+                        <!-- submit names to database -->
+                        <button class="submit submit-names" onClick="initiateIngestion();return false;">Submit Name(s)</button>
+                        <!-- re-submit names -->
+                        <button class="submit re-submit" onClick="resubmitInitialIngestion();return false;">Re-submit Name(s)</button>
+                        <!-- to source location -->
+                        <button class="next continue" onClick="changeSection(1);fillOutFormFromData();return false;">Select Source Location</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- section 2: source location -->
+            <section id="section_source_location">
+                <h3>Enter the criteria for this data's source location</h3>
+                <form name="sourceLocation" onSubmit="return false;">
+                    <!-- location -->
+                    <div class="form-group">
+                        <label>Select Location</label>
+                        <div id="loc-options-box" class="loc-box">
+                            <script>
+                                options = sourceLocations.map((option) => {
+                                    const opt = $('<div class="list-item"><input id="chk_' + option.value + '" name="loc-options" class="loc-option" type="radio" value="' + option.value + '" onClick="showLocDependencies(\'' + option.value + '\')" /><label class="side-label" for="chk_' + option.value + '">' + option.name + '</label></div>');
+                                    $('#loc-options-box').append(opt);
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <!-- location dependencies -->
+                    <div id="loc-dependencies">
+                        <div class="form-groups"></div>
+                    </div>
+                    <h3><input type="checkbox" id="needs_un_pw" name="needs_un_pw" onChange="showUnPw($(this).prop('checked'))" /> Check if your source requires a username and password to access</h3>
+                    <div id="un_pw" class="form-groups">
+                        <!-- username -->
+                        <div class="form-group">
+                            <label>Source Username</label>
+                            <input type="text" name="source_username" id="source_username" onBlur="thisIngestion.source.source_username = this.value" />
+                        </div>
+                        <!-- password -->
+                        <div class="form-group">
+                            <label>Source Password</label>
+                            <input type="password" name="source_password" id="source_password" onBlur="thisIngestion.source.source_password = this.value" />
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <!-- back to description -->
+                        <button class="prev" onClick="changeSection(-1);return false;">Back to Description</button>
+                        <!-- to source format -->
+                        <button class="next" onClick="changeSection(1);return false;">Select Source Format</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- section 3: source format -->
+            <section id="section_source_format">
+                <h3>
+                    Enter the criteria for this data's current format
+                </h3>
+                <form name="sourceFormat" onSubmit="return false;">
+                    <div class="form-groups">
+                        <!-- format -->
+                        <div class="form-group">
+                            <label>Select Format</label>
+                            <div id="format-options-box" class="format-box"></div>
+                        </div>
+                        <!-- select delimiter (only if format is 'delimited') -->
+                        <div id="delimiters" class="form-group delimiters">
+                            <label>Select Delimiter</label>
+                            <script>
+                                options = delimiterOptions.map((option) => {
+                                    const opt = $('<div class="list-item"><input id="chk_' + option + '" name="delimiter-options" class="del-option" type="radio" value="' + option + '" onChange="thisIngestion.source_delimiter = this.value" /><label class="side-label" for="chk_' + option + '">' + option + '</label></div>');
+                                    $('#delimiters').append(opt);
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <!-- select encoding -->
+                    <div id="encoding" class="form-group">
+                        <label>Select Encoding</label>
+                        <script>
+                            options = encodingOptions.map((option) => {
+                                const opt = $('<div class="list-item"><input id="chk_' + option + '" name="encoding-options" class="enc-option" type="radio" value="' + option + '" onChange="thisIngestion.source_encoding = this.value"  /><label class="side-label" for="chk_' + option + '">' + option + '</label></p>');
+                                $('#encoding').append(opt);
+                            });
+                        </script>
+                    </div>
+                    <!-- schema fields -->
+                    <div class="form-groups">
+                        <div class="form-group">
+                            <label>Schema Fields</label>
+                            <table id="schema-table" class="table">
+                                <thead>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>NNPI</th>
+                                    <th></th>
+                                </thead>
+                                <tbody><!-- schema field rows will generate here --></tbody>
+                            </table>
+                            <p><i class="fas fa-plus-square pointer" onClick="addSchemaField()"></i></p>
+                        </div>
+                    </div>
+                    <!-- sample file upload -->
+                    <div class="form-group">
+                        <label>Upload a Sample File to be Inferred</label>
+                        <input type="file" name="upload" onBlur="thisIngestion.sample_file = this.value" />
+                    </div>
+                    <div class="actions">
+                        <!-- back to source location -->
+                        <button class="prev" onClick="changeSection(-1);return false;">Back to Source Location</button>
+                        <!-- to target -->
+                        <button class="next" onClick="changeSection(1);return false;">Select Target</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- section 4: target -->
+            <section id="section_target">
+                <h3>
+                    Enter the target location for this data
+                </h3>
+                <form name="targetLocation" onSubmit="return false;">
+                    <!-- location -->
+                    <div class="form-group">
+                        <label>Select Location</label>
+                        <div id="target-options-box" class="loc-box">
+                            <script>
+                                options = targetLocations.map((option) => {
+                                    const opt = $('<div class="list-item"><input id="chk_' + option.value + '" name="loc-options" class="loc-option" type="radio" value="' + option.value + '" onChange="thisIngestion.target_location = this.value" /><label class="side-label" for="chk_' + option.value + '">' + option.name + '</label></div>');
+                                    $('#target-options-box').append(opt);
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <!-- back to source format -->
+                        <button class="prev" onClick="changeSection(-1);return false;">Back to Source Format</button>
+                        <!-- to scheduling -->
+                        <button class="next" onClick="changeSection(1);return false;">Set Scheduling</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- section 5: scheduling -->
+            <section id="section_scheduling">
+                <h3>
+                    Enter the frequency and date for Scheduling of the Ingestion
+                </h3>
+                <form name="scheduling" onSubmit="return false;">
+                    <!-- frequency -->
+                    <div id="frequencies" class="form-group">
+                        <label>Select Frequency</label>
+                        <script>
+                            options = frequencies.map((option) => {
+                                const opt = $('<div class="list-item"><input id="chk_' + option.value + '" name="encoding-options" class="enc-option" type="radio" value="' + option.value + '" onChange="thisIngestion.schedule_frequency = this.value"  /><label class="side-label" for="chk_' + option.value + '">' + option.name + '</label></div>');
+                                $('#frequencies').append(opt);
+                            });
+                        </script>
+                    </div>
+                    <!-- date picker -->
+                    <div class="form-group">
+                        <label>Select Date and Time for first Ingestion</label>
+                        <input type="datetime-local" name="date_time" id="date_time" onBlur="thisIngestion.schedule_date = this.value" />
+                    </div>
+                    <div class="actions">
+                        <!-- back to target -->
+                        <button class="prev" onClick="changeSection(-1);return false;">Back to Target</button>
+                        <!-- to complete -->
+                        <button class="submit" onClick="changeSection(1);return false;">Submit Ingestion for Scheduling</button>
+                    </div>
+                </form>
+            </section>
+        </sections>
+        <span class="clear-storage" onClick="deleteLocalStorage()">clear local storage</span>
+    </div> 
+    <script>
+        init();
+    </script>
+</body>
+</html>

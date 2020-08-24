@@ -1,0 +1,182 @@
+html {
+    font-family: proxima-nova, 'Century Gothic', arial, sans-serif;
+    font-size:16px;
+    scroll-behavior: smooth;
+}
+h1 {
+    font-size: 2em;
+    font-weight: 300;
+    margin: 0 0 15px;
+}
+h3 {
+    font-size: 1.1em;
+    font-weight: normal;
+    color: #666;
+    margin: 30px 0;
+}
+.pointer {
+    cursor: pointer;
+}
+/* action buttons on bottom */
+.actions {
+    margin: 30px 0;
+}
+.actions button {
+    padding: 10px;
+    color: #fff;
+    background: #4ec8eb;
+    border-radius:5px;
+    border:none;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+.actions button.prev:before {
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: "\f0a8";
+    margin-right: 5px;
+}
+.actions button.next:after {
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: "\f0a9";
+    margin-left: 5px;
+}
+.container {
+    max-width: 90%;
+    margin:25px auto;
+}
+header {
+    color: #002f6c;
+    background: #fff;
+    padding: 5px 5px 20px;
+    border-bottom: 1px solid #002f6c;
+}
+/* breadcrumb */
+.breadcrumb ol {
+    padding: 0;
+    margin: 0;
+}
+.breadcrumb li {
+    display: inline-block;
+    padding: 10px;
+    border: 1px solid #fff;
+    border-radius: 18px;
+    margin-right: 5px;
+    color: #646469;
+    text-transform: uppercase;
+    font-size: 0.8em;
+}
+.breadcrumb li:hover {
+    cursor: pointer;
+    color: #4ec8eb;
+}
+.breadcrumb li.active,
+.breadcrumb li.active:hover {
+    color: #002f6c;
+    border-color: #002f6c;
+    background: #fff;
+    text-decoration: none;
+    cursor: default;
+}
+/* data sections */
+sections section {
+    display: none;
+}
+sections section.active {
+    display: block;
+}
+.form-group {
+    margin: 15px 0;
+}
+.form-group > label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 300;
+    font-size: 0.9em;
+    color: #002f6c;
+    font-size: 1.1em;
+}
+.form-group > label:after {
+    content: ":";
+}
+.form-group label.side-label {
+    display: inline;
+}
+/* inputs */
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="datetime-local"],
+.form-group select {
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-width: 300px; 
+}
+.form-group textarea {
+    width: 400px;
+    height: 200px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: proxima-nova, 'Century Gothic', arial, sans-serif;;
+    font-size: 1em;
+}
+.form-group .list-item {
+    margin:0 15px 15px 0;
+}
+/* define */
+#section_description h3.new,
+#section_description h3.match,
+.form-group.tags,
+.form-group.comments,
+#section_description.new .actions .submit-names,
+#section_description.matched .actions .submit-names,
+#section_description .actions .re-submit,
+#section_description .actions .continue {
+    display: none;       
+}
+#section_description.new h3.new,
+#section_description.matched h3.match,
+.initiated .form-group.tags,
+.initiated .form-group.comments {
+    display: block;
+}
+#section_description.matched .actions .re-submit,
+#section_description.initiated .actions .continue {
+    display: initial;       
+}
+.tag-options-box {
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr;
+}
+/* source location */
+#loc-dependencies .loc-dep {
+    display:none;
+}
+#loc-dependencies.s3 .loc_s3,
+#loc-dependencies.db .loc_db {
+    display:block;
+}
+#un_pw {
+    display: none;
+}
+#section_source_location.secured #un_pw {
+    display: block;
+}
+.delimiters {
+    display:none;
+}
+.clear-storage {
+    cursor: pointer;
+}
+.clear-storage:before {
+    content: "[";
+}
+.clear-storage:after {
+    content: "]";
+}
+.clear-storage:hover {
+    text-decoration: underline;
+}
