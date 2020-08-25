@@ -14,6 +14,7 @@ let ingestions = [
         "source": {
             "id": 1,
             "locationid": 1,
+            "location": "s3",
             "locationAttributes": {},
             "delimiter": "comma",
             "formatid": "3",
@@ -22,13 +23,15 @@ let ingestions = [
                 "id": null,
                 "value": null
             },
-            "fields": [
+            "schema_fields": [
                 {
+                    "id": 1,
                     "name": "ssn",
                     "type": "TaxId",
                     "nnpi": "yes"
                 },
                 {
+                    "id" : 2,
                     "name": "name",
                     "type": "Text",
                     "nnpi": "no"
@@ -39,6 +42,7 @@ let ingestions = [
         "target": {
             "id": 1,
             "locationid": 3,
+            "location": "datalake",
             "locationAttributes": {},
             "formatid": "1",
             "delimiter": "colon",
@@ -62,8 +66,6 @@ let ingestions = [
 
 // for setting id of each new ingestion
 let idCount = ingestions.length + 1;
-// variable for adding new data
-let newData = {};
 // key for local storage
 const LOCAL_STORAGE_KEY = 'dmd_demo';
 // current section index
@@ -73,16 +75,20 @@ let thisLoc = null;
 // for schema fields table
 let schemaFields = [
     {
+        id: 1,
         name: 'SSN',
         type: 'taxid',
         nnpi: 'true'
     },
     {
+        id: 2,
         name: 'DOB',
         type: 'date',
         nnpi: 'false'
     }
 ];
+// for setting id of each new schema
+let schemaCount = schemaFields.length + 1;
 
 // Ingestion wizard sections
 const sections = [
@@ -130,7 +136,13 @@ const sourceLocations = [
                 name : 'path_to_file'
             }
         ],
-        format_dependencies : ['delimited', 'fixed', 'Parquet', 'XML', 'JSON']
+        format_dependencies : [
+            {name:'Delimited', value:'delimited'}, 
+            {name:'Fixed', value:'fixed'}, 
+            {name:'Parquet', value:'parquet'},
+            {name:'XML', value:'xml'},
+            {name:'JSON', value:'json'}
+        ]
     },
     {
         name : 'Database',
@@ -145,13 +157,25 @@ const sourceLocations = [
                 name : 'database_table'
             }
         ],
-        format_dependencies : ['Relational', 'Relational XML', 'Relational JSON']
+        format_dependencies : [
+            {name:'Relational', value:'relational'},
+            {name:'Relational XML', value:'relational_xml'},
+            {name:'Relational JSON', value:'relational_json'}
+        ]
     }
 ];
 
-const delimiterOptions =  ['comma', 'colon', 'tab'];
+const delimiterOptions =  [
+    {name:'Comma', value:'comma'},
+    {name:'Colon', value:'colon'}, 
+    {name:'Tab', value:'tab'}
+];
 
-const encodingOptions = ['UTF8', 'UTF16', 'ascii'];
+const encodingOptions = [
+    {name:'UTF8', value:'utf8'},
+    {name:'UTF16', value:'utf16'},
+    {name:'ascii', value:'ascii'}
+];
 
 const schemaTypes = [
     {name:'Text', value:'text'},

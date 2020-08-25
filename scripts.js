@@ -108,46 +108,35 @@ const fillOutFormFromData = () => {
     }
     $('#section_description #comments').val(thisIngestion.pipeline.comments);
     // source location
-    if (thisIngestion.source.source_location) {
-        thisLoc = sourceLocations.find((e) => { return e.value === thisIngestion.source.source_location });
-        $('#loc-options-box #chk_' + thisIngestion.source.source_location).prop('checked', true);
+    if (thisIngestion.source.location) {
+        thisLoc = sourceLocations.find((e) => { return e.value === thisIngestion.source.location });
+        $('#loc-options-box #chk_' + thisIngestion.source.location).prop('checked', true);
         showLocDependencies();
         thisLoc.loc_dependencies.map((d) => {
             $('#loc-dependencies #' + d.name).val(thisIngestion.source[d.name]);
         });
-        $('#section_source_location #source_username').val(thisIngestion.source.source_username);
-        $('#section_source_location #source_password').val(thisIngestion.source.source_password);
-        if (thisIngestion.source.source_username) {
+        $('#section_source_location #source_username').val(thisIngestion.source.username);
+        $('#section_source_location #source_password').val(thisIngestion.source.password);
+        if (thisIngestion.source.username) {
             showUnPw(true);
             $('#section_source_location #needs_un_pw').prop('checked', true);
         }
         showFormatDependencies();
     }
     // source format
-    if (thisIngestion.schema_fields) {
+    $('#section_source_format #format-options-box #chk_' + thisIngestion.source.format).prop('checked', true);
+    $('#section_source_format #delimiters #chk_' + thisIngestion.source.delimiter).prop('checked', true);
+    $('#section_source_format #encoding #chk_' + thisIngestion.source.encoding).prop('checked', true);
+    if (thisIngestion.source.schema_fields) {
         schemaFields = thisIngestion.source.schema_fields;
     }
     buildSchemaFields();
-};
-
-/**
- * function to define ingestion
- * requires tags and comments
- */
-const defineIngestion = (formData, direction) => {
-    console.log('description form', formData);
-    const selectedTags = [];
-    for (let i = 0; i < formData.tags.length; i++) {
-        selectedTags.push(formData.tags[i].value);
-    };
-    newData = {
-        tags: selectedTags,
-        comments : formData.comments
-    }
-    thisIngestion = {...thisIngestion, ...newData};
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(thisIngestion));
-    console.log('defined ingestion', thisIngestion);
-    changeSection(direction);
+    $('#section_source_format .sample-upload .inbody-info span').text(thisIngestion.source.sample_file);
+    // target
+    $('#section_target #target-options-box #chk_' + thisIngestion.target.location).prop('checked', true);
+    // scheduling
+    $('#section_scheduling #frequencies #chk_' + thisIngestion.schedule.repeat).prop('checked', true);
+    $('#section_scheduling #date-time').val(thisIngestion.schedule.timestamp);
 };
 
 /**
@@ -169,7 +158,7 @@ const updateTags = () => {
  */
 const showLocDependencies = (loc) => {
     if (loc) {
-        thisIngestion.source.source_location = loc;
+        thisIngestion.source.location = loc;
         thisLoc = sourceLocations.find((e) => { return e.value === loc; });
     }
     let locInp = $('#loc-dependencies .form-groups');
@@ -181,51 +170,34 @@ const showLocDependencies = (loc) => {
         locInp.append(inp);
     });
     thisLoc.format_dependencies.map((d) => {
-        const opt = $('<div class="list-item"><input id="chk_' + d + '" name="loc-options" class="loc-option" type="radio" value="' + d + '" onClick="showFormatDependencies(\'' + d + '\')" /><label class="side-label" for="chk_' + d + '">' + d + '</label></div>');
+        const opt = $('<div class="list-item"><input id="chk_' + d.value + '" name="loc-options" class="loc-option" type="radio" value="' + d.value + '" onClick="showFormatDependencies(\'' + d.value + '\')" /><label class="side-label" for="chk_' + d.value + '">' + d.name + '</label></div>');
         formatInp.append(opt);
     });
 }
-
-/**
- * function to enter source location criteria
- * requires location and dependent inputs
- */
-const enterSourceLocation = (formData, direction) => {
-    console.log('source location form', formData);
-    newData = {source_location : formData.location};
-    formData.dependencies.map((d) => {
-        newData[d.name] = d.value;
-    });
-    for (let i = 0; i < formData.dependencies.length; i++) {
-        if (!!formData.dependencies[i].value) {
-            newData[formData.dependencies[i].name] = formData.dependencies[i].value;
-        }
-    };
-    thisIngestion = {...thisIngestion, ...newData};
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(thisIngestion));
-    console.log('source location ingestion', thisIngestion);
-    changeSection(direction);
-};
 
 /**
  * if source format is 'delimited' than show delimiter options
  */
 const showFormatDependencies = (opt) => {
     if (opt) {
-        thisIngestion.source_format = opt;
+        thisIngestion.source.format = opt;
     }
     const delimiterOptions = $('#delimiters');
-    if (thisIngestion.source_format === 'delimited') {
+    if (thisIngestion.source.format === 'delimited') {
         delimiterOptions.show();
-        if (thisIngestion.format_delimiter) {
-            $('#chk_' + thisIngestion.format_delimiter).prop('checked', true);
+        if (thisIngestion.source.delimiter) {
+            $('#chk_' + thisIngestion.source.delimiter).prop('checked', true);
         }
     } else {
-        thisIngestion.format_delimiter = null;
+        thisIngestion.source.delimiter = null;
         delimiterOptions.hide();
     }
 };
 
+/**
+ * show or hide the username and password fields for source location
+ * @param {*} bool true means show username and password fields
+ */
 const showUnPw = (bool) => {
     const sl = $('#section_source_location');
     if (bool) {
@@ -241,29 +213,35 @@ const showUnPw = (bool) => {
  * build the schema fields table
  */
 const buildSchemaFields = () => {
-    const schemaTable = $('#schema-table tbody');
-    let options;
-    schemaTable.html('');
-    schemaTypes.map((type) => {
-        options += '<option value="' + type.value + '">' + type.name + '</option>';
-    });
-    const types = '<select name="type" onBlur="updateSchemaFieldData()">' + options + '</select>';
-    const nnpi = '<select name="nnpi" onBlur="updateSchemaFieldData()"><option value="true">Yes</option><option value="false">No</option></select>';
-    schemaFields.map((schema) => {
-        let row = $('<tr><td class="name"><input type="text" value="' + schema.name + '" onBlur="updateSchemaFieldData()" /></td><td class="type">' + types + '</td><td class="nnpi">' + nnpi + '</td><td class="actions"><i class="fas fa-trash-alt pointer " onClick="deleteSchemaField(\'' + schema.name + '\')"></i></td></tr>');
-        $('.type select', row).val(schema.type);
-        $('.nnpi select', row).val(schema.nnpi);
-        // console.log('this row type', $('.type select', row).val());
-        // console.log('this row nnpi', $('.nnpi select', row).val());
-        schemaTable.append(row);
-    });
+    if (schemaFields.length) {
+        const schemaTable = $('#schema-table tbody');
+        let options;
+        schemaTable.html('');
+        schemaTypes.map((type) => {
+            options += '<option value="' + type.value + '">' + type.name + '</option>';
+        });
+        const types = (id) => {
+            return '<select name="type" onBlur="updateSchemaFieldData(' + id + ', \'type\', this.value)">' + options + '</select>';
+        };
+        const nnpi = (id) => {
+            return '<select name="nnpi" onBlur="updateSchemaFieldData(' + id + ', \'nnpi\', this.value)"><option value="true">Yes</option><option value="false">No</option></select>';
+        };
+        schemaFields.map((schema) => {
+            let row = $('<tr id="schema_' + schema.id + '"><td class="name"><input name="name" type="text" value="' + schema.name + '" onBlur="updateSchemaFieldData(' + schema.id + ', \'name\', this.value)" /></td><td class="type">' + types(schema.id) + '</td><td class="nnpi">' + nnpi(schema.id) + '</td><td class="actions"><i class="fas fa-trash-alt pointer " onClick="deleteSchemaField(\'' + schema.id + '\')" title="Delete"></i></td></tr>');
+            $('.type select', row).val(schema.type);
+            $('.nnpi select', row).val(schema.nnpi);
+            // console.log('this row type', $('.type select', row).val());
+            // console.log('this row nnpi', $('.nnpi select', row).val());
+            schemaTable.append(row);
+        });
+    }
 };
 
 /**
  * add new schema field row in table
  */
 const addSchemaField = () => {
-    let newField = {name:'',type:'',nnpi:'false'};
+    let newField = {name:'',type:'',nnpi:'false',id:schemaCount};
     schemaFields.push(newField);
     buildSchemaFields();
 };
@@ -271,16 +249,20 @@ const addSchemaField = () => {
 /**
  * delete existing schema field
  */
-const deleteSchemaField = (fieldName) => {
-    console.log('schema to delete', fieldName);
-    schemaFields = schemaFields.filter((e) => { return e.name !== fieldName; });
-    updateSchemaFieldData();
-    buildSchemaFields();
+const deleteSchemaField = (id) => {
+    console.log('schema to delete', id);
+    schemaFields = schemaFields.filter((e) => { return parseInt(e.id) !== parseInt(id); });
+    console.log('remaining schema fields', schemaFields);
+    $('#schema-table tr#schema_' + id).remove();
+    thisIngestion.source.schema_fields = schemaFields;
 };
 
 /**
  * update the ingestion schema fields data
  */
-const updateSchemaFieldData = () => {
-    thisIngestion.schema_fields = schemaFields;
+const updateSchemaFieldData = (id, field, val) => {
+    console.log('id, field, val: ', id, field, val);
+    let thisSchema = schemaFields.find((e) => { return e.id === id; });
+    thisSchema[field] = val;
+    thisIngestion.source.schema_fields = schemaFields;
 };

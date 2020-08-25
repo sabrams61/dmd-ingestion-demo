@@ -14,6 +14,10 @@ h3 {
     color: #666;
     margin: 30px 0;
 }
+.inbody-info {
+    font-size: 0.9em;
+    color: #999;
+}
 .pointer {
     cursor: pointer;
 }
@@ -29,6 +33,10 @@ h3 {
     border:none;
     cursor: pointer;
     text-transform: uppercase;
+    margin-right: 15px;
+}
+.actions button:last-of-type {
+    margin-right: 0;
 }
 .actions button.prev:before {
     font-family: "Font Awesome 5 Free"; 
@@ -91,7 +99,7 @@ sections section.active {
 }
 .form-group > label {
     display: block;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     font-weight: 300;
     font-size: 0.9em;
     color: #002f6c;
@@ -102,6 +110,9 @@ sections section.active {
 }
 .form-group label.side-label {
     display: inline;
+}
+.form-group label.side-label span {
+    color: #999;
 }
 /* inputs */
 .form-group input[type="text"],
@@ -149,7 +160,7 @@ sections section.active {
 }
 .tag-options-box {
     display: inline-grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 /* source location */
 #loc-dependencies .loc-dep {
@@ -168,6 +179,27 @@ sections section.active {
 .delimiters {
     display:none;
 }
+/* schema table */
+#schema-table th,
+#schema-table td {
+    text-align: left;
+    width: 150px;
+    min-width: auto;
+}
+#schema-table .nnpi {
+    width: 100px;
+}
+#schema-table .actions {
+    width: 50px;
+    text-align: center;
+    color: #c00;
+}
+#schema-table input,
+#schema-table select {
+    width: 100%;
+    min-width: auto;
+}
+/* clear storage link */
 .clear-storage {
     cursor: pointer;
 }
