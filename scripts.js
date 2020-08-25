@@ -1,9 +1,107 @@
 /**
+ * get url parameter
+ * @param {} sParam 
+ */
+const getUrlParameter = (sParam) => {
+    let sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
+};
+
+// thisIngestion
+let thisIngestion;
+// status of thisIngestion
+let ingestionStatus = 'edit'
+
+/**
+ * pull up saved data from local storage
+ * if section param in url, go directly to that section
+ */
+const init = () => {
+    resetThisIngestion();
+    const thisSection = getUrlParameter('section');
+    if (thisSection) {
+        for (let n = 0; n < sections.length; n++) {
+            if (sections[n].name === thisSection) {
+                return changeSection(null, n);
+            }
+        }
+    }
+};
+
+/**
+ * empty out thisIngestion
+ */
+const resetThisIngestion = () => {
+    thisIngestion = {
+        id : idCount,
+        pipeline : {},
+        source : {},
+        target : {},
+        schedule : {}
+    }
+}
+
+/**
+ * after using enters ingestion name and/or project name, submits to  begin ingestion process
+ * compares to list of all current ingestion to see if there's a match
+ */
+const initiateIngestion = () => {
+    const ingName = $('#section_names input#name').val();
+    const projName = $('#section_names input#project_name').val();
+    const nameArea = $('#ingestion-names');
+    if (ingName || projName) {
+        nameArea.removeClass();
+        nameArea.html('<span>Ingestion: </span>');
+        if (ingName) {
+            nameArea.append($('<span>' + ingName + '</span>'));
+        }
+        if (projName) {
+            nameArea.append($('<span>' + projName + '</span>'));
+        }
+        $('#section_description').removeClass('new matched initiated');
+        const match = ingestions.find((e) => { return e.pipeline.name === ingName && e.pipeline.project_name === projName; });
+        if (match) {
+            thisIngestion = JSON.parse(JSON.stringify(match));
+            console.log('we found a match', thisIngestion);
+            fillOutTagsCommentsFromData();
+            $('#section_description').addClass('initiated');
+            $('#section_description').addClass('matched');
+        } else {
+            console.log('brand new ingestion');
+            $('#section_description').addClass('initiated');
+            $('#section_description').addClass('new');
+            $('#section_description input#name').prop('disabled', true);
+            $('#section_description input#project_name').prop('disabled', true);
+        }
+        changeSection(1);
+        nameArea.show();
+    }
+}
+
+/**
  * delete local storage
  */
 const deleteLocalStorage = () => {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
 };
+
+const applyLocalStorage = () => {
+    thisIngestion = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    console.log('saved data', thisIngestion);
+    if (thisIngestion) {
+        fillOutFormFromData();
+    }
+}
 
 /**
  * switch to a different section, either forward or backward, or directly to specific section
@@ -20,58 +118,6 @@ const changeSection = (direction, goto) => {
     $('.breadcrumb li').show().removeClass('active');
     $('.breadcrumb li.' + newSection).addClass('active');
     window.scrollTo(0, 0);
-}
-
-/**
- * empty out thisIngestion
- */
-const resetThisIngestion = () => {
-    thisIngestion = {
-        id : idCount,
-        pipeline : {},
-        source : {},
-        target : {},
-        schedule : {}
-    }
-}
-
-/**
- * pull up saved data from local storage
- */
-const init = () => {
-    thisIngestion = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-    console.log('saved data', thisIngestion);
-    if (thisIngestion) {
-        fillOutFormFromData();
-    } else {
-        resetThisIngestion();
-    }
-};
-
-/**
- * after using enters ingestion name and/or project name, submits to  begin ingestion process
- * compares to list of all current ingestion to see if there's a match
- */
-const initiateIngestion = () => {
-    const ingName = $('#section_description input#name').val();
-    const projName = $('#section_description input#project_name').val();
-    if (ingName || projName) {
-        $('#section_description').removeClass('new matched initiated');
-        const match = ingestions.find((e) => { return e.pipeline.name === ingName && e.pipeline.project_name === projName; });
-        if (match) {
-            thisIngestion = JSON.parse(JSON.stringify(match));
-            console.log('we found a match', thisIngestion);
-            fillOutTagsCommentsFromData();
-            $('#section_description').addClass('initiated');
-            $('#section_description').addClass('matched');
-        } else {
-            console.log('brand new ingestion');
-            $('#section_description').addClass('initiated');
-            $('#section_description').addClass('new');
-            $('#section_description input#name').prop('disabled', true);
-            $('#section_description input#project_name').prop('disabled', true);
-        }
-    }
 }
 
 const resubmitInitialIngestion = () => {
@@ -98,9 +144,10 @@ const fillOutTagsCommentsFromData = () => {
  * fill out form inputs from thisIngestion data
  */
 const fillOutFormFromData = () => {
+    // names
+    $('#section_names input#name').val(thisIngestion.pipeline.name);
+    $('#section_names input#project_name').val(thisIngestion.pipeline.project_name);
     // description
-    $('#section_description input#name').val(thisIngestion.pipeline.name);
-    $('#section_description input#project_name').val(thisIngestion.pipeline.project_name);
     if (!!thisIngestion.pipeline.tags) {
         thisIngestion.pipeline.tags.map((tag) => {
             $('#tag-options-box #chk_' + tag).prop('checked', true);
@@ -131,7 +178,7 @@ const fillOutFormFromData = () => {
         schemaFields = thisIngestion.source.schema_fields;
     }
     buildSchemaFields();
-    $('#section_source_format .sample-upload .inbody-info span').text(thisIngestion.source.sample_file);
+    $('#section_source_format .sample-upload p span').text(thisIngestion.source.sample_file);
     // target
     $('#section_target #target-options-box #chk_' + thisIngestion.target.location).prop('checked', true);
     // scheduling
@@ -182,7 +229,7 @@ const showFormatDependencies = (opt) => {
     if (opt) {
         thisIngestion.source.format = opt;
     }
-    const delimiterOptions = $('#delimiters');
+    const delimiterOptions = $('.form-group.delimiters');
     if (thisIngestion.source.format === 'delimited') {
         delimiterOptions.show();
         if (thisIngestion.source.delimiter) {
@@ -265,4 +312,15 @@ const updateSchemaFieldData = (id, field, val) => {
     let thisSchema = schemaFields.find((e) => { return e.id === id; });
     thisSchema[field] = val;
     thisIngestion.source.schema_fields = schemaFields;
+};
+
+/**
+ * complete ingestion scheduling
+ */
+const completeIngestion = () => {
+    ingestionStatus = 'complete';
+    const areaNames = $('#ingestion-names');
+    let comMsg = 'Your ingestion ( ' + thisIngestion.pipeline.name + ' ' + thisIngestion.pipeline.project_name + ' ) has successfully been scheduled.'
+    areaNames.addClass('complete').text(comMsg);
+    changeSection(null, 0);
 };

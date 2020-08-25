@@ -9,7 +9,7 @@ let ingestions = [
             "targetid": 1,
             "scheduleid": 1,
             "comments": "this is a default ingestion already included for testing purposes",
-            "tags": ['apple', 'banana']
+            "tags": ['alphta', 'beta']
         },
         "source": {
             "id": 1,
@@ -18,7 +18,8 @@ let ingestions = [
             "locationAttributes": {},
             "delimiter": "comma",
             "formatid": "3",
-            "encoding": "UTF8",
+            "format": "fixed",
+            "encoding": "utf8",
             "userAction": {
                 "id": null,
                 "value": null
@@ -26,15 +27,15 @@ let ingestions = [
             "schema_fields": [
                 {
                     "id": 1,
-                    "name": "ssn",
-                    "type": "TaxId",
-                    "nnpi": "yes"
+                    "name": "SSN",
+                    "type": "taxid",
+                    "nnpi": "true"
                 },
                 {
                     "id" : 2,
-                    "name": "name",
-                    "type": "Text",
-                    "nnpi": "no"
+                    "name": "DOB",
+                    "type": "date",
+                    "nnpi": "false"
                 }
             ],
             "username" : "lastjedi",
@@ -92,6 +93,7 @@ let schemaCount = schemaFields.length + 1;
 
 // Ingestion wizard sections
 const sections = [
+    {name:'names',desc:'Name Ingestion'},
     {name:'description',desc:'Define Ingestion'},
     {name:'source_location',desc:'Select Source Location'},
     {name:'source_format',desc:'Select Source Format'},
@@ -104,19 +106,19 @@ const sections = [
 const tagOptions = [
     {
         name : 'a-code',
-        value : 'apple'
+        value : 'alpha'
     },
     {
         name : 'b-code',
-        value : 'banana'
+        value : 'beta'
     },
     {
         name : 'c-code',
-        value : 'cucumber'
+        value : 'chi'
     },
     {
         name : 'd-code',
-        value : 'dandelion'
+        value : 'delta'
     },
 
 ];
@@ -207,5 +209,3 @@ const frequencies = [
     {name:'Cron', value:'cron'},
     {name:'Run Now', value:'runnow'}
 ];
-
-let thisIngestion = null;

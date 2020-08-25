@@ -12,20 +12,21 @@ h3 {
     font-size: 1.1em;
     font-weight: normal;
     color: #666;
-    margin: 30px 0;
+    margin: 20px 0;
 }
 .inbody-info {
     font-size: 0.9em;
-    color: #999;
+    color: #d9d9d6;
 }
 .pointer {
     cursor: pointer;
 }
 /* action buttons on bottom */
 .actions {
-    margin: 30px 0;
+    margin: 50px 0;
 }
-.actions button {
+.actions button,
+.sample-upload button {
     padding: 10px;
     color: #fff;
     background: #4ec8eb;
@@ -58,7 +59,7 @@ header {
     color: #002f6c;
     background: #fff;
     padding: 5px 5px 20px;
-    border-bottom: 1px solid #002f6c;
+    border-bottom: 2px solid #002f6c;
 }
 /* breadcrumb */
 .breadcrumb ol {
@@ -87,22 +88,37 @@ header {
     text-decoration: none;
     cursor: default;
 }
+#ingestion-names {
+    padding: 10px;
+    background: #002f6c;
+    color: #fff;
+    display: none;
+}
+#ingestion-names.complete {
+    background: #43b02a;
+}
+#ingestion-names span:nth-of-type(3):before {
+    content: "-";
+    margin: 0 10px;
+}
 /* data sections */
 sections section {
     display: none;
 }
 sections section.active {
-    display: block;
+    display: inline-block;
 }
+.form-groups {}
 .form-group {
-    margin: 15px 0;
+    margin: 25px 0;
 }
 .form-group > label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     font-weight: 300;
     font-size: 0.9em;
     color: #002f6c;
+    background: #fff;
     font-size: 1.1em;
 }
 .form-group > label:after {
@@ -112,7 +128,7 @@ sections section.active {
     display: inline;
 }
 .form-group label.side-label span {
-    color: #999;
+    color: #d9d9d6;
 }
 /* inputs */
 .form-group input[type="text"],
@@ -135,32 +151,26 @@ sections section.active {
     font-size: 1em;
 }
 .form-group .list-item {
-    margin:0 15px 15px 0;
+    margin-bottom: 15px;
 }
 /* define */
 #section_description h3.new,
-#section_description h3.match,
-.form-group.tags,
-.form-group.comments,
-#section_description.new .actions .submit-names,
-#section_description.matched .actions .submit-names,
-#section_description .actions .re-submit,
-#section_description .actions .continue {
+#section_description h3.match {
     display: none;       
 }
 #section_description.new h3.new,
-#section_description.matched h3.match,
-.initiated .form-group.tags,
-.initiated .form-group.comments {
+#section_description.matched h3.match {
     display: block;
 }
-#section_description.matched .actions .re-submit,
-#section_description.initiated .actions .continue {
-    display: initial;       
-}
-.tag-options-box {
+.grid {
     display: inline-grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-auto-rows: 40px;
+}
+.grid-3 {
+    grid-template-columns: repeat(3, 250px);
+}
+.grid .list-item {
+    margin: 0 50px 0 0;
 }
 /* source location */
 #loc-dependencies .loc-dep {
@@ -180,11 +190,17 @@ sections section.active {
     display:none;
 }
 /* schema table */
+#schema-table {
+    margin: 15px 0;
+}
 #schema-table th,
 #schema-table td {
     text-align: left;
-    width: 150px;
+    width: 200px;
     min-width: auto;
+}
+#schema-table th {
+    padding-left: 11px;
 }
 #schema-table .nnpi {
     width: 100px;
@@ -193,22 +209,49 @@ sections section.active {
     width: 50px;
     text-align: center;
     color: #c00;
+    font-size: 1.2em;
 }
 #schema-table input,
 #schema-table select {
     width: 100%;
     min-width: auto;
 }
+.add-schema {
+    cursor: pointer;
+    margin-left: 11px;
+}
+.add-schema i {
+    font-size: 1.2em;
+    color: #4ec8eb;
+}
+.sample-upload div {
+    position: relative;
+}
+.sample-upload input[type="file"] {
+    position: absolute;
+    left: -500px;
+    opacity: 0;
+}
+.sample-upload p {
+    color: #d9d9d6;
+}
+.sample-upload p span {
+    color: #000;
+}
+.sample-upload button i {
+    margin-left: 5px;
+    font-size: 1.2em;
+}
 /* clear storage link */
-.clear-storage {
+.clear-storage span {
     cursor: pointer;
 }
-.clear-storage:before {
+.clear-storage span:before {
     content: "[";
 }
-.clear-storage:after {
+.clear-storage span:after {
     content: "]";
 }
-.clear-storage:hover {
+.clear-storage span:hover {
     text-decoration: underline;
 }
