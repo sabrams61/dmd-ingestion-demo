@@ -62,9 +62,16 @@ const clearFormData = () => {
     $('textarea').val('');
     $('input[type="checkbox"]').prop('checked', false);
     $('input[type="radio"]').prop('checked', false);
-    schemaFields = [];
+    schemaFields = [{
+        id : 1,
+        name : '',
+        type : '',
+        nnpi : ''
+    }];
     $('#schema-table tbody').html('');
     showUnPw(false);
+    $('#loc-dependencies').html('');
+    $('#format-options-box').html('');
     $('#section_source_format .sample-upload p span').text('');
     resetThisIngestion();
 }
@@ -110,11 +117,12 @@ const initiateIngestion = () => {
             $('#section_description').addClass('initiated');
             $('#section_description').addClass('matched');
         } else {
-            console.log('brand new ingestion');
+            clearFormData();
+            thisIngestion.pipeline.name = ingName;
+            thisIngestion.pipeline.project_name = projName;
+            console.log('brand new ingestion', thisIngestion);
             $('#section_description').addClass('initiated');
             $('#section_description').addClass('new');
-            $('#section_description input#name').prop('disabled', true);
-            $('#section_description input#project_name').prop('disabled', true);
         }
         changeSection(1);
         nameArea.show();

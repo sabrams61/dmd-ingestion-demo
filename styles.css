@@ -168,11 +168,10 @@ sections section.active {
     margin: 0 50px 0 0;
 }
 /* define */
-#section_description h3.new,
 #section_description h3.match {
+    color: #ee2737;
     display: none;       
 }
-#section_description.new h3.new,
 #section_description.matched h3.match {
     display: block;
 }
@@ -236,7 +235,7 @@ sections section.active {
 #schema-table .actions {
     width: 50px;
     text-align: center;
-    color: #c00;
+    color: #ee2737;
     font-size: 1.2em;
 }
 #schema-table input,

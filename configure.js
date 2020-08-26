@@ -74,7 +74,14 @@ let currentSectionIndex = 0;
 // selected source location object with dependencies
 let thisLoc = null;
 // for schema fields table
-let schemaFields = [];
+let schemaFields = [
+    {
+        id : 1,
+        name : '',
+        type : '',
+        nnpi : ''
+    }
+];
 // let schemaFields = []
 //     {
 //         id: 1,
