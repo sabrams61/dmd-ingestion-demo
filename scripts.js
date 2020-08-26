@@ -384,4 +384,5 @@ const completeIngestion = () => {
     areaNames.addClass('complete').html(comMsg);
     clearFormData();
     changeSection(null, 0);
+    $('.breadcrumb li:not(.names)').hide();
 };
