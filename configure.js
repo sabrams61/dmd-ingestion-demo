@@ -3,8 +3,8 @@ let ingestions = [
     {
         "id": 1,
         "pipeline": {
-            "name": "leads",
-            "project_name": "marketing",
+            "name": "Leads",
+            "project_name": "Marketing",
             "sourceid": 1,
             "targetid": 1,
             "scheduleid": 1,
@@ -71,6 +71,16 @@ let idCount = ingestions.length + 1;
 const LOCAL_STORAGE_KEY = 'dmd_demo';
 // current section index
 let currentSectionIndex = 0;
+// current project names
+let projectNames = [
+    {name:'Marketing', value:'marketing'},
+    {name:'Sales', value:'sales'},
+    {name:'Life Insurance', value:'life_insurance'},
+    {name:'Retirement Planning', value:'retirement_planning'},
+    {name:'Investing', value:'investing'},
+    {name:'General', value:'general'},
+    {name:'Company', value:'company'}
+];
 // selected source location object with dependencies
 let thisLoc = null;
 // for schema fields table

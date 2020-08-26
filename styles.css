@@ -3,6 +3,9 @@ html {
     font-size:16px;
     scroll-behavior: smooth;
 }
+.relative {
+    position: relative;
+}
 h1 {
     font-size: 2em;
     font-weight: 300;
@@ -98,9 +101,24 @@ header {
 #ingestion-names.complete {
     background: #43b02a;
 }
-#ingestion-names span:nth-of-type(2):before {
-    content: "-";
+#ingestion-names span:not(:first-of-type):before {
+    content: "::";
     margin: 0 10px;
+}
+#project-options {
+    display: none;
+    position: absolute;
+    background: #fff;
+    border: 1px solid #d9d9d6;
+    width: 298px;
+}
+#project-options .option {
+    padding: 5px 10px;
+}
+#project-options .option:hover {
+    cursor: pointer;
+    background: #4ec8eb;
+    color: #fff;
 }
 /* data sections */
 sections section {
@@ -124,6 +142,8 @@ sections section.active {
     color: #002f6c;
     background: #fff;
     font-size: 1.1em;
+}
+label.required:after {
 }
 .form-group > label:after {
     content: ":";

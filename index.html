@@ -36,18 +36,32 @@
 
             <!-- section 1: names -->
             <section id="section_names" class="active">
-                <h3>You may enter an Ingestion Name and/or a Project Name. We will compare the name(s) to other Ingestions in our database to ensure there are no duplicates.</h3>
-                <form name="names" onSubmit="return false;">
+                <h3>Enter Project Name and Ingestion Name. Domain Name is optional. We will compare the name(s) to other Ingestions in our database to ensure there are no duplicates.</h3>
+                <form autocomplete="off" name="names" onSubmit="return false;">
+                    <input autocomplete="off" name="hidden" type="text" style="display:none;">
                     <div class="form-groups last">
+                        <!-- project name -->
+                        <div class="form-group relative">
+                            <label class="required">Project Name</label>
+                            <input type="text" name="project_name" id="project_name" onKeyup="filterProjectOptions(this.value)" onFocus="$('#project-options').show()" onBlur="thisIngestion.pipeline.project_name = this.value;" />
+                            <div id="project-options" class="project-options">
+                                <script>
+                                    projectNames.map((option) => {
+                                        let opt = '<div class="option" onClick="setProjectName(\'' + option.name + '\')">' + option.name + '</div>';
+                                        $('#project-options').append(opt);
+                                    });
+                                </script>
+                            </div>
+                        </div>
+                        <!-- domain name -->
+                        <div class="form-group">
+                            <label>Domain Name</label>
+                            <input type="text" name="domain_name" id="domain_name" onBlur="thisIngestion.pipeline.domain_name = this.value" />
+                        </div>
                         <!-- ingestion name -->
                         <div class="form-group">
-                            <label>Ingestion Name</label>
+                            <label class="required">Ingestion Name</label>
                             <input type="text" name="name" id="name" onBlur="thisIngestion.pipeline.name = this.value" />
-                        </div>
-                        <!-- project name -->
-                        <div class="form-group">
-                            <label>Project Name</label>
-                            <input type="text" name="project_name" id="project_name" onBlur="thisIngestion.pipeline.project_name = this.value" />
                         </div>
                     </div>
                     <div class="actions">
@@ -134,6 +148,9 @@
                                     <i class="far fa-eye" onClick="showPw()"></i>
                                 </span>
                             </div>
+                        </div>
+                        <div class="form-button">
+                            <button onClick="alert('made successful connection')">Test Location Connection</button>
                         </div>
                     </div>
                     <div class="actions">
