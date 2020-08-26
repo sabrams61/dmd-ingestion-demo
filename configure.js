@@ -74,20 +74,21 @@ let currentSectionIndex = 0;
 // selected source location object with dependencies
 let thisLoc = null;
 // for schema fields table
-let schemaFields = [
-    {
-        id: 1,
-        name: 'SSN',
-        type: 'taxid',
-        nnpi: 'true'
-    },
-    {
-        id: 2,
-        name: 'DOB',
-        type: 'date',
-        nnpi: 'false'
-    }
-];
+let schemaFields = [];
+// let schemaFields = []
+//     {
+//         id: 1,
+//         name: 'SSN',
+//         type: 'taxid',
+//         nnpi: 'true'
+//     },
+//     {
+//         id: 2,
+//         name: 'DOB',
+//         type: 'date',
+//         nnpi: 'false'
+//     }
+// ];
 // for setting id of each new schema
 let schemaCount = schemaFields.length + 1;
 

@@ -52,6 +52,39 @@ const resetThisIngestion = () => {
 }
 
 /**
+ * clear all form inputs and reset thisIngestion
+ */
+const clearFormData = () => {
+    $('input[type="text"]').val('');
+    $('input[type="password"]').val('');
+    $('input[type="datetime-local"]').val('');
+    $('select').val('');
+    $('textarea').val('');
+    $('input[type="checkbox"]').prop('checked', false);
+    $('input[type="radio"]').prop('checked', false);
+    schemaFields = [];
+    $('#schema-table tbody').html('');
+    showUnPw(false);
+    $('#section_source_format .sample-upload p span').text('');
+    resetThisIngestion();
+}
+
+/**
+ * delete local storage
+ */
+const deleteLocalStorage = () => {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+};
+
+const applyLocalStorage = () => {
+    thisIngestion = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    console.log('saved data', thisIngestion);
+    if (thisIngestion) {
+        fillOutFormFromData();
+    }
+}
+
+/**
  * after using enters ingestion name and/or project name, submits to  begin ingestion process
  * compares to list of all current ingestion to see if there's a match
  */
@@ -61,7 +94,7 @@ const initiateIngestion = () => {
     const nameArea = $('#ingestion-names');
     if (ingName || projName) {
         nameArea.removeClass();
-        nameArea.html('<span>Ingestion: </span>');
+        nameArea.html('<b>Ingestion: </b>');
         if (ingName) {
             nameArea.append($('<span>' + ingName + '</span>'));
         }
@@ -89,21 +122,6 @@ const initiateIngestion = () => {
 }
 
 /**
- * delete local storage
- */
-const deleteLocalStorage = () => {
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-};
-
-const applyLocalStorage = () => {
-    thisIngestion = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-    console.log('saved data', thisIngestion);
-    if (thisIngestion) {
-        fillOutFormFromData();
-    }
-}
-
-/**
  * switch to a different section, either forward or backward, or directly to specific section
  * @param {direction} integer 1 or -1 to move to previous or next section
  * @param {goto} integer of direct section to go to
@@ -118,13 +136,6 @@ const changeSection = (direction, goto) => {
     $('.breadcrumb li').show().removeClass('active');
     $('.breadcrumb li.' + newSection).addClass('active');
     window.scrollTo(0, 0);
-}
-
-const resubmitInitialIngestion = () => {
-    resetThisIngestion();
-    $('#tag-options-box input').prop('checked', false);
-    $('#section_description #comments').val('');
-    initiateIngestion();
 }
 
 /**
@@ -187,8 +198,25 @@ const fillOutFormFromData = () => {
 };
 
 /**
+ * build tag options
+ */
+const buildTags = (newTag) => {
+    options = newTag ? newTag : tagOptions;
+    if (!newTag) {
+        $('#tag-options-box').html('');
+    }
+    options.map((option) => {
+        const opt = $('<div class="list-item"><input id="chk_' + option.value + '" name="tag-options" class="tag-option" type="checkbox" value="' + option.value + '" onChange="updateTags()" /><label class="side-label" for="chk_' + option.value + '">' + option.name + ' <span>[' + option.value + ']</span></label></div>');
+        $('#tag-options-box').append(opt);
+        if (newTag) {
+            $('#section_description #chk_' + option.value).prop('checked', true);
+            updateTags();
+        }
+    });
+};
+
+/**
  * update tags in thisIngestion
- * @param {*} options 
  */
 const updateTags = () => {
     const selectedTags = [];
@@ -200,6 +228,22 @@ const updateTags = () => {
 };
 
 /**
+ * add a new tag to options list and select it
+ */
+const addNewTag = () => {
+    let tn = $('#add-tag-name');
+    let tv = $('#add-tag-value');
+    const newTag = {
+        name : tn.val(),
+        value: tv.val()
+    };
+    tagOptions.push(newTag);
+    buildTags([newTag]);
+    tn.val('');
+    tv.val('');
+};
+
+/**
  * when a user selects a location, saves location to ingestion
  * determines lists of dependent location and format options
  */
@@ -208,7 +252,7 @@ const showLocDependencies = (loc) => {
         thisIngestion.source.location = loc;
         thisLoc = sourceLocations.find((e) => { return e.value === loc; });
     }
-    let locInp = $('#loc-dependencies .form-groups');
+    let locInp = $('#loc-dependencies');
     let formatInp = $('#format-options-box');
     locInp.html('');
     formatInp.html('');
@@ -255,6 +299,15 @@ const showUnPw = (bool) => {
         thisIngestion.source.password = '';
     }
 }
+
+/**
+ * allow user to view password
+ */
+const showPw = () => {
+    const inp = $('#source_password');
+    const type = inp.prop('type');
+    $('#source_password').prop('type', type === 'password' ? 'text' : 'password');
+};
 
 /**
  * build the schema fields table
@@ -320,7 +373,15 @@ const updateSchemaFieldData = (id, field, val) => {
 const completeIngestion = () => {
     ingestionStatus = 'complete';
     const areaNames = $('#ingestion-names');
-    let comMsg = 'Your ingestion ( ' + thisIngestion.pipeline.name + ' ' + thisIngestion.pipeline.project_name + ' ) has successfully been scheduled.'
-    areaNames.addClass('complete').text(comMsg);
+    let comMsg = 'Your ingestion ( ';
+    if (thisIngestion.pipeline.name) {
+        comMsg += '<span>' + thisIngestion.pipeline.name + '</span>';
+    }
+    if (thisIngestion.pipeline.project_name) {
+        comMsg += '<span>' + thisIngestion.pipeline.project_name + '</span>';
+    }
+    comMsg += ' ) has successfully been scheduled.';
+    areaNames.addClass('complete').html(comMsg);
+    clearFormData();
     changeSection(null, 0);
 };
