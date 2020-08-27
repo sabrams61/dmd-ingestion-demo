@@ -133,7 +133,7 @@ const initiateIngestion = () => {
         }
         nameArea.append($('<span>' + ingName + '</span>'));
         $('#section_description').removeClass('new matched initiated');
-        const match = ingestions.find((e) => { return e.pipeline.name === ingName && e.pipeline.project_name === projName; });
+        const match = ingestions.find((e) => { return e.pipeline.project_name === projName && e.pipeline.domain_name === domName && e.pipeline.name === ingName; });
         if (match) {
             thisIngestion = JSON.parse(JSON.stringify(match));
             console.log('we found a match', thisIngestion);
@@ -164,6 +164,9 @@ const changeSection = (direction, goto) => {
     console.log('current ingestion from ' + sections[currentSectionIndex].name, thisIngestion);
     currentSectionIndex = direction ? currentSectionIndex + direction : goto;
     let newSection = sections[currentSectionIndex].name;
+    if (newSection === 'submit') {
+        buildReview();
+    }
     $('sections section').removeClass('active');
     $('#section_' + newSection).addClass('active');
     $('.breadcrumb li').show().removeClass('active');
@@ -399,6 +402,54 @@ const updateSchemaFieldData = (id, field, val) => {
     let thisSchema = schemaFields.find((e) => { return e.id === id; });
     thisSchema[field] = val;
     thisIngestion.source.schema_fields = schemaFields;
+};
+
+const showText = (section, field) => {
+    return thisIngestion[section][field];
+};
+
+const buildReview = () => {
+    const rev = $('#review_worksheet');
+    rev.html('');
+    reviewWorksheet.sections.map((section) => {
+        // let secGroup = $('<div class="review-section" id="review_' + section.section_key + '"><div class="section-name">' + section.name + '</div><div class="section-fields"></div></div>');
+        let secName = $('<div class="section-name">' + section.name + '</div>');
+        let dataSec = thisIngestion[section.section_key];
+        // console.log('dataSec', secGroup);
+        //rev.append(secGroup);
+        rev.append(secName);
+        // let theseFields = $('#review_' + section.section_key + ' .section-fields');
+        section.fields.map((field) => {
+            let fieldName = $('<div class="label">' + field.name + '</div>');
+            let fieldVal = $('<div class="value"></div>');            
+            switch (field.type) {
+                case 'text':
+                    fieldVal.text(dataSec[field.field_key]);
+                    break;
+                case 'password':
+                    fieldVal.text(dataSec[field.field_key].replace(/./g, '*'));
+                    break;
+                case 'date':
+                    let thisDate = new Date(dataSec[field.field_key]);
+                    let date = thisDate.getFullYear()+'-'+(thisDate.getMonth()+1)+'-'+thisDate.getDate();
+                    let time = thisDate.getHours() + ":" + thisDate.getMinutes() + ":" + thisDate.getSeconds();
+                    let dateTime = date+' '+time;
+                    fieldVal.text(dateTime);
+                    break;
+                case 'object-array':
+                    console.log('field key, value', field.field_key, dataSec[field.field_key]);
+                    let thisObj = field.get_values_from.find((e) => { return e.value === dataSec[field.field_key]; });
+                    fieldVal.text(thisObj.name);
+                    break;
+                default:
+                    fieldVal.text('hello');
+            }
+            // theseFields.append(fieldName);
+            // theseFields.append(fieldVal);
+            rev.append(fieldName);
+            rev.append(fieldVal);
+        });
+    });
 };
 
 /**

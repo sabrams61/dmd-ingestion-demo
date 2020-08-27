@@ -149,8 +149,8 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="form-button">
-                            <button onClick="alert('made successful connection')">Test Location Connection</button>
+                        <div class="form-button test-source">
+                            <button onClick="alert('made successful connection')">Test Location Connection <i class="fas fa-network-wired"></i></button>
                         </div>
                     </div>
                     <div class="actions">
@@ -165,7 +165,18 @@
             <!-- section 4: source format -->
             <section id="section_source_format">
                 <!-- <h3>Enter the criteria for this data's current format</h3> -->
-                <form name="sourceFormat" onSubmit="return false;">
+                <form name="sourceFormat" onSubmit="return false;">                    
+                    <!-- sample file upload -->
+                    <div class="form-groups">
+                        <div class="form-group sample-upload">
+                            <label>Upload Sample File to be Inferred</label>
+                            <div>
+                                <button class="file-click" onClick="$('#infer-sample').click();return false;">Choose File <i class="fas fa-file-upload"></i></button>
+                                <input type="file" size="60" id="infer-sample" name="infer-sample" onChange="$('.sample-upload p span').text(this.value);thisIngestion.source.sample_file = this.value" />
+                                <p>Selected file: <span></span></p>
+                            </div>
+                        </div>
+                    </div>
                     <div class="form-groups">
                         <!-- format -->
                         <div class="form-group">
@@ -178,7 +189,7 @@
                             <div id="delimiters" class="">
                                 <script>
                                     options = delimiterOptions.map((option) => {
-                                        const opt = $('<div class="list-item"><input id="chk_' + option.value + '" name="delimiter-options" class="del-option" type="radio" value="' + option.value + '" onChange="thisIngestion.source.delimiter = this.value" /><label class="side-label" for="chk_' + option.value + '">' + option.name + '</label></div>');
+                                        const opt = $('<div class="list-item"><input id="chk_' + option.value + '" name="delimiter-options" class="del-option" type="radio" value="' + option.value + '" onChange="thisIngestion.source.delimiter = this.value" /><label class="side-label" for="chk_' + option.value + '">' + option.name + ' ( ' + option.example + ' )</label></div>');
                                         $('#delimiters').append(opt);
                                     });
                                 </script>
@@ -198,7 +209,7 @@
                         </div>
                     </div>
                     <!-- schema fields -->
-                    <div class="form-groups">
+                    <div class="form-groups last">
                         <div class="form-group">
                             <label>Schema Fields</label>
                             <table id="schema-table" class="table">
@@ -211,17 +222,6 @@
                                 <tbody><!-- schema field rows will generate here --></tbody>
                             </table>
                             <div class="add-schema" onClick="addSchemaField()"><i class="fas fa-plus-square pointer"></i> Add a new schema field</div>
-                        </div>
-                    </div>
-                    <!-- sample file upload -->
-                    <div class="form-groups last">
-                        <div class="form-group sample-upload">
-                            <label>Upload Sample File to be Inferred</label>
-                            <div>
-                                <button class="file-click" onClick="$('#infer-sample').click();return false;">Choose File <i class="fas fa-file-upload"></i></button>
-                                <input type="file" size="60" id="infer-sample" name="infer-sample" onChange="$('.sample-upload p span').text(this.value);thisIngestion.source.sample_file = this.value" />
-                                <p>Selected file: <span></span></p>
-                            </div>
                         </div>
                     </div>
                     <div class="actions">
@@ -290,6 +290,41 @@
                     <div class="actions">
                         <!-- back to target -->
                         <button class="prev" onClick="changeSection(-1);return false;">Back to Target</button>
+                        <!-- to complete -->
+                        <button class="next" onClick="changeSection(1);return false;">Review Ingestion</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- section 7: review and submit -->
+            <section id="section_submit">
+                <form name="submit" onSubmit="return false;">
+                    <!-- review worksheet -->
+                    <div class="form-groups">
+                        <div class="form-group">
+                            <div id="review_worksheet" class="review"></div>
+                        </div>
+                    </div>
+                    <div class="form-groups last">
+                        <!-- confirmation email -->
+                        <div class="form-group">
+                            <label class="required">Include an email to receive confirmation of the submission</label>
+                            <div>
+                                <input type="email" name="confirmation_email" id="confirmation_email" onBlur="thisIngestion.pipeline.confirmation_email = this.value" />
+                            </div>
+                        </div>
+                        <!-- confirmation email -->
+                        <div class="form-group">
+                            <label>If you wish to receive notification after each Ingestion, include an email (does not have to be the same)</label>
+                            <h3><input type="checkbox" id="copy_email" name="copy_email" onChange="$(this).prop('checked') ? $('#schedule_email').val($('#confirmation_email').val()) : $('#schedule_email').val('')" /> <label for="needs_un_pw">Check to use the same email</label></h3>
+                            <div>
+                                <input type="email" name="schedule_email" id="schedule_email" onBlur="thisIngestion.pipeline.confirmation_email = this.value" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <!-- back to target -->
+                        <button class="prev" onClick="changeSection(-1);return false;">Back to Scheduling</button>
                         <!-- to complete -->
                         <button class="submit" onClick="completeIngestion();return false;">Submit Ingestion for Scheduling</button>
                     </div>

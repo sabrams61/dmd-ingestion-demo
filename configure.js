@@ -5,16 +5,19 @@ let ingestions = [
         "pipeline": {
             "name": "Leads",
             "project_name": "Marketing",
+            "domain_name": "",
             "sourceid": 1,
             "targetid": 1,
             "scheduleid": 1,
             "comments": "this is a default ingestion already included for testing purposes",
-            "tags": ['alphta', 'beta']
+            "tags": ['alpha', 'beta']
         },
         "source": {
             "id": 1,
             "locationid": 1,
             "location": "s3",
+            "project_folder": "Q4",
+            "path_to_file": "s3://marketing/leads/2019/quarters",
             "locationAttributes": {},
             "delimiter": "comma",
             "formatid": "3",
@@ -65,6 +68,17 @@ let ingestions = [
     }
 ];
 
+// Ingestion wizard sections
+const sections = [
+    {name:'names',desc:'Name Ingestion'},
+    {name:'description',desc:'Describe Ingestion'},
+    {name:'source_location',desc:'Select Source Location'},
+    {name:'source_format',desc:'Select Source Format'},
+    {name:'target',desc:'Select Target'},
+    {name:'scheduling',desc:'Set Scheduling'},
+    {name:'submit',desc:'Review and Submit'}
+];
+
 // for setting id of each new ingestion
 let idCount = ingestions.length + 1;
 // key for local storage
@@ -109,33 +123,22 @@ let schemaFields = [
 // for setting id of each new schema
 let schemaCount = schemaFields.length + 1;
 
-// Ingestion wizard sections
-const sections = [
-    {name:'names',desc:'Name Ingestion'},
-    {name:'description',desc:'Define Ingestion'},
-    {name:'source_location',desc:'Select Source Location'},
-    {name:'source_format',desc:'Select Source Format'},
-    {name:'target',desc:'Select Target'},
-    {name:'scheduling',desc:'Set Scheduling'}
-    // {name:'complete',desc:'Ingestion Complete'}
-];
-
 // static list of tags user can choose from when describing the Ingestion
 const tagOptions = [
     {
-        name : 'a-code',
+        name : 'A-code',
         value : 'alpha'
     },
     {
-        name : 'b-code',
+        name : 'B-code',
         value : 'beta'
     },
     {
-        name : 'c-code',
+        name : 'C-code',
         value : 'chi'
     },
     {
-        name : 'd-code',
+        name : 'D-code',
         value : 'delta'
     },
 
@@ -186,9 +189,9 @@ const sourceLocations = [
 ];
 
 const delimiterOptions =  [
-    {name:'Comma', value:'comma'},
-    {name:'Colon', value:'colon'}, 
-    {name:'Tab', value:'tab'}
+    {name:'Comma', value:'comma', example: ','},
+    {name:'Colon', value:'colon', example: ':'}, 
+    {name:'Tab', value:'tab', example: '&nbsp;&nbsp;&nbsp;&nbsp;'}
 ];
 
 const encodingOptions = [
@@ -227,3 +230,148 @@ const frequencies = [
     {name:'Cron', value:'cron'},
     {name:'Run Now', value:'runnow'}
 ];
+
+// set up for review worksheet
+const reviewWorksheet = {
+    sections : [
+        {
+            name : 'Description',
+            section_key : 'pipeline',
+            fields : [
+                {
+                    name: 'Project Name',
+                    field_key: 'project_name',
+                    type: 'text'
+                },
+                {
+                    name: 'Domain Name',
+                    field_key: 'domain_name',
+                    type: 'text'
+                },
+                {
+                    name: 'Ingestion Name',
+                    field_key: 'name',
+                    type: 'text'
+                },
+                {
+                    name: 'Tags',
+                    field_key: 'tags',
+                    type: 'object-array-mult',
+                    get_values_from: tagOptions
+                },
+                {
+                    name: 'Description',
+                    field_key: 'comments',
+                    type: 'text'
+                }
+            ]
+        },
+        {
+            name : 'Source',
+            section_key : 'source',
+            fields : [
+                {
+                    name: 'Location',
+                    field_key: 'location',
+                    type: 'object-array',
+                    get_values_from: sourceLocations
+                },
+                {
+                    name: 'Project Folder',
+                    field_key: 'project_folder',
+                    type: 'text',
+                    dependency_field: 'location',
+                    dependency_value: 's3'
+                },
+                {
+                    name: 'Path Folder',
+                    field_key: 'path_to_file',
+                    type: 'text',
+                    dependency_field: 'location',
+                    dependency_value: 's3'
+                },
+                {
+                    name: 'Database Schema',
+                    field_key: 'database_schema',
+                    type: 'text',
+                    dependency_field: 'location',
+                    dependency_value: 'database'
+                },
+                {
+                    name: 'Database Table',
+                    field_key: 'database_table',
+                    type: 'text',
+                    dependency_field: 'location',
+                    dependency_value: 'database'
+                },
+                {
+                    name: 'Username',
+                    field_key: 'username',
+                    type: 'text'
+                },
+                {
+                    name: 'Password',
+                    field_key: 'password',
+                    type: 'password'
+                },
+                {
+                    name: 'Format Sample File',
+                    field_key: 'sample_file',
+                    type: 'text'
+                },
+                {
+                    name: 'Format',
+                    field_key: 'format',
+                    type: 'text'
+                },
+                {
+                    name: 'Delimiter',
+                    field_key: 'delimiter',
+                    type: 'object-array',
+                    get_values_from: delimiterOptions
+                },
+                {
+                    name: 'Encoding',
+                    field_key: 'encoding',
+                    type: 'object-array',
+                    get_values_from: encodingOptions
+                },
+                {
+                    name: 'Schema Fields',
+                    field_key: 'schema_fields',
+                    type: 'object-array-mult',
+                    get_values_from: schemaFields
+                },
+            ]
+        },
+        {
+            name : 'Target',
+            section_key : 'target',
+            fields : [
+                {
+                    name: 'Location',
+                    field_key: 'location',
+                    type: 'object-array',
+                    get_values_from: targetLocations
+                }
+            ]
+        },
+        {
+            name : 'Schedule',
+            section_key : 'schedule',
+            fields : [
+                {
+                    name: 'Frequency',
+                    field_key: 'repeat',
+                    type: 'object-array',
+                    get_values_from: frequencies
+                },
+                {
+                    name: 'Ingestion Date',
+                    field_key: 'timestamp',
+                    type: 'date'
+                }
+            ]
+        }
+    ]
+};

@@ -29,7 +29,8 @@ h3 {
     margin: 50px 0;
 }
 .actions button,
-.sample-upload button {
+.sample-upload button,
+.test-source button {
     padding: 10px;
     color: #fff;
     background: #4ec8eb;
@@ -52,6 +53,9 @@ h3 {
     font-family: "Font Awesome 5 Free"; 
     font-weight: 900; 
     content: "\f0a9";
+    margin-left: 5px;
+}
+.test-source button i {
     margin-left: 5px;
 }
 .container {
@@ -157,6 +161,7 @@ label.required:after {
 /* inputs */
 .form-group input[type="text"],
 .form-group input[type="password"],
+.form-group input[type="email"],
 .form-group input[type="datetime-local"],
 .form-group select {
     padding: 10px;
@@ -287,6 +292,24 @@ label.required:after {
 .sample-upload button i {
     margin-left: 5px;
     font-size: 1.2em;
+}
+/* review page */
+#review_worksheet {
+    display: inline-grid;
+    grid-template-columns: 200px 500px; 
+}
+#review_worksheet .section-name {
+    grid-column-start: 1; 
+    grid-column-end: 3;
+    background: #002f6c;
+    color: #fff;
+    padding: 5px 10px;
+    text-transform: uppercase;
+}
+#review_worksheet .label,
+#review_worksheet .value {
+    padding: 5px 10px;
+    border-bottom: 1px solid #d9d9d6;
 }
 /* clear storage link */
 .clear-storage span {
