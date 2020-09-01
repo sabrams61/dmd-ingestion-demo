@@ -9,9 +9,9 @@ let ingestions = [
             "sourceid": 1,
             "targetid": 1,
             "scheduleid": 1,
+            "owner_email": "sabrams61@massmutual.com",
             "comments": "this is a default ingestion already included for testing purposes",
-            "tags": ['alpha', 'beta'],
-            "owner_email": 'sabrams61@massmutual.com'
+            "tags": [1, 3]
         },
         "source": {
             "id": 1,
@@ -61,11 +61,11 @@ let ingestions = [
         "schedule": {
             "id": 1,
             "repeat": "monthly",
-            "timestamp": "2020-08-21T14:07:54.000Z",
+            "timestamp": "2020-09-11T11:10",
             "cron_string": "",
             "excludeTimestamps": [],
             "scheduled": true,
-            "schedule_email": 'bigbluff@massmutual.com'
+            "schedule_email": "bigbluff@massmutual.com"
         }
     }
 ];
@@ -126,25 +126,66 @@ let schemaFields = [
 let schemaCount = schemaFields.length + 1;
 
 // static list of tags user can choose from when describing the Ingestion
-const tagOptions = [
+let tagOptions = [
     {
-        name : 'A-code',
-        value : 'alpha'
+        id : 1,
+        name : 'A-Code',
+        value : 'Alpha'
     },
     {
-        name : 'B-code',
-        value : 'beta'
+        id : 2,
+        name : 'B-Code',
+        value : 'Beta'
     },
     {
-        name : 'C-code',
-        value : 'chi'
+        id : 3,
+        name : 'C-Code',
+        value : 'Chi'
     },
     {
-        name : 'D-code',
-        value : 'delta'
+        id : 4,
+        name : 'D-Code',
+        value : 'Delta'
     },
-
+    {
+        id : 5,
+        name : 'E-Code',
+        value : 'Epsilon'
+    },
+    {
+        id : 6,
+        name : 'F-Code',
+        value : 'Phi'
+    },
+    {
+        id : 7,
+        name : 'G-Code',
+        value : 'Gamma'
+    },
+    {
+        id : 8,
+        name : 'H-Code',
+        value : 'Eta'
+    },
+    {
+        id : 11,
+        name : 'T-Code',
+        value : "Tau"
+    },
+    {
+        id : 9,
+        name : 'I-Code',
+        value : 'Iota'
+    },
+    {
+        id : 10,
+        name : 'K-Code',
+        value : 'Kappa'
+    }
 ];
+
+// selected tags in this ingestion
+let selectedTags = [];
 
 // static list of source locations
 const sourceLocations = [
@@ -251,11 +292,6 @@ const reviewWorksheet = {
                     type: 'text'
                 },
                 {
-                    name: 'Ingestion Owner\'s Email',
-                    field_key: 'owner_email',
-                    type: 'text'
-                },
-                {
                     name: 'Ingestion Name',
                     field_key: 'name',
                     type: 'text'
@@ -269,6 +305,11 @@ const reviewWorksheet = {
                 {
                     name: 'Description',
                     field_key: 'comments',
+                    type: 'text'
+                },
+                {
+                    name: 'Ingestion Owner\'s Email',
+                    field_key: 'owner_email',
                     type: 'text'
                 }
             ]

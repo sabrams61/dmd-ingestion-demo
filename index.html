@@ -36,14 +36,14 @@
 
             <!-- section 1: names -->
             <section id="section_names" class="active">
-                <h3>Enter Project Name and Ingestion Name. Domain Name is optional. We will compare the name(s) to other Ingestions in our database to ensure there are no duplicates. You will also need to include the ingestion's owner's email to receive confirmation.</h3>
+                <h3>Enter Project Name and Ingestion Name. Domain Name is optional. We will compare the name(s) to other Ingestions in our database to ensure there are no duplicates. You will also need to include the ingestion owner's email to receive confirmation.</h3>
                 <form autocomplete="off" name="names" onSubmit="return false;">
                     <input autocomplete="off" name="hidden" type="text" style="display:none;">
-                    <div class="form-groups">
+                    <div class="form-groups last">
                         <!-- project name -->
                         <div class="form-group relative">
                             <label class="required">Project Name</label>
-                            <input type="text" name="project_name" id="project_name" onKeyup="filterProjectOptions(this.value)" onFocus="$('#project-options').show()" onBlur="thisIngestion.pipeline.project_name = this.value;" />
+                            <input type="text" name="project_name" id="project_name" onKeyup="filterProjectOptions(this.value)" onFocus="$('#project-options').show()" onBlur="thisIngestion.pipeline.project_name = this.value;" value="Marketing" />
                             <div id="project-options" class="project-options">
                                 <script>
                                     projectNames.map((option) => {
@@ -61,16 +61,7 @@
                         <!-- ingestion name -->
                         <div class="form-group">
                             <label class="required">Ingestion Name</label>
-                            <input type="text" name="name" id="name" onBlur="thisIngestion.pipeline.name = this.value" />
-                        </div>
-                    </div>
-                    <div class="form-groups last">
-                        <!-- owners email -->
-                        <div class="form-group">
-                            <label class="required">Ingestion Owner's Email</label>
-                            <div>
-                                <input type="email" name="owner_email" id="owner_email" onBlur="thisIngestion.pipeline.owner_email = this.value" />
-                            </div>
+                            <input type="text" name="name" id="name" onBlur="thisIngestion.pipeline.name = this.value" value="Leads" />
                         </div>
                     </div>
                     <div class="actions">
@@ -88,13 +79,15 @@
                 <form name="description" onSubmit="return false;">
                     <!-- tags -->
                     <div class="form-groups">
-                        <div class="form-group tags">
+                        <div class="form-group">
                             <label class="required">Tags (select at least one)</label>
-                            <div id="tag-options-box" class="tag-options-box grid grid-3">
-                                <script>
-                                    buildTags();
-                                </script>
+                            <div class="tags">
+                                <div class="tag-choices-box">
+                                    <select id="tag-choices" size="5" onChange="updateTags($(this).val(), true)"></select>
+                                </div>
+                                <div id="selected-tags" class="selected-tags"></div>
                             </div>
+                            <script>buildTagsChoiceList()</script>
                             <div class="add-tag">
                                 <p>Add a new tag:</p>
                                 <p>
@@ -106,10 +99,19 @@
                         </div>
                     </div>
                     <!-- comments -->
-                    <div class="form-groups last">
+                    <div class="form-groups">
                         <div class="form-group comments">
                             <label class="required">Description</label>
                             <textarea id="comments" name="comments" onBlur="thisIngestion.pipeline.comments = this.value"></textarea>
+                        </div>
+                    </div>
+                    <!-- owners email -->
+                    <div class="form-groups last">
+                        <div class="form-group">
+                            <label class="required">Ingestion Owner's Email</label>
+                            <div>
+                                <input type="email" name="owner_email" id="owner_email" onBlur="thisIngestion.pipeline.owner_email = this.value" />
+                            </div>
                         </div>
                     </div>
                     <div class="actions">

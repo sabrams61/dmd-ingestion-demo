@@ -63,6 +63,8 @@ const clearFormData = () => {
     $('textarea').val('');
     $('input[type="checkbox"]').prop('checked', false);
     $('input[type="radio"]').prop('checked', false);
+    tagOptions = tagOptions.concat(selectedTags);
+    selectedTags = [];
     schemaFields = [{
         id : 1,
         name : '',
@@ -124,9 +126,8 @@ const initiateIngestion = () => {
     const projName = $('#section_names input#project_name').val();
     const domName = $('#section_names input#domain_name').val();
     const ingName = $('#section_names input#name').val();
-    const oEmail = $('#section_names input#owner_email').val();
     const nameArea = $('#ingestion-names');
-    if (ingName || projName) {
+    if (projName || ingName) {
         nameArea.removeClass();
         nameArea.html('');
         nameArea.append($('<span>' + projName + '</span>'));
@@ -139,7 +140,7 @@ const initiateIngestion = () => {
         if (match) {
             thisIngestion = JSON.parse(JSON.stringify(match));
             console.log('we found a match', thisIngestion);
-            fillOutTagsCommentsFromData();
+            fillOutFormFromData();
             $('#section_description').addClass('initiated');
             $('#section_description').addClass('matched');
         } else {
@@ -147,7 +148,6 @@ const initiateIngestion = () => {
             thisIngestion.pipeline.project_name = projName;
             thisIngestion.pipeline.domain_name = domName;
             thisIngestion.pipeline.name = ingName;
-            thisIngestion.pipeline.owner_email = oEmail;
             console.log('brand new ingestion', thisIngestion);
             $('#section_description').addClass('initiated');
             $('#section_description').addClass('new');
@@ -178,34 +178,22 @@ const changeSection = (direction, goto) => {
 }
 
 /**
- * fill out form inputs for only tags and comments
- */
-const fillOutTagsCommentsFromData = () => {
-    // description
-    if (!!thisIngestion.pipeline.tags) {
-        thisIngestion.pipeline.tags.map((tag) => {
-            $('#tag-options-box #chk_' + tag).prop('checked', true);
-        });
-    }
-    $('#section_description #comments').val(thisIngestion.pipeline.comments);
-};
-
-/**
  * fill out form inputs from thisIngestion data
  */
 const fillOutFormFromData = () => {
     // names
-    $('#section_names input#project_name').val(thisIngestion.pipeline.project_name);
-    $('#section_names input#domain_name').val(thisIngestion.pipeline.domain_name);
-    $('#section_names input#name').val(thisIngestion.pipeline.name);
-    $('#section_names input#owner_email').val(thisIngestion.pipeline.owner_email);
+    $('#section_names #project_name').val(thisIngestion.pipeline.project_name);
+    $('#section_names #domain_name').val(thisIngestion.pipeline.domain_name);
+    $('#section_names #name').val(thisIngestion.pipeline.name);
     // description
     if (!!thisIngestion.pipeline.tags) {
-        thisIngestion.pipeline.tags.map((tag) => {
-            $('#tag-options-box #chk_' + tag).prop('checked', true);
+        thisIngestion.pipeline.tags.map((tagVal) => {
+            updateTags(tagVal, true);
         });
     }
+    buildTagsChoiceList();
     $('#section_description #comments').val(thisIngestion.pipeline.comments);
+    $('#section_description #owner_email').val(thisIngestion.pipeline.owner_email);
     // source location
     if (thisIngestion.source.location) {
         thisLoc = sourceLocations.find((e) => { return e.value === thisIngestion.source.location });
@@ -240,34 +228,37 @@ const fillOutFormFromData = () => {
 };
 
 /**
- * build tag options
- */
-const buildTags = (newTag) => {
-    options = newTag ? newTag : tagOptions;
-    if (!newTag) {
-        $('#tag-options-box').html('');
-    }
-    options.map((option) => {
-        const opt = $('<div class="list-item"><input id="chk_' + option.value + '" name="tag-options" class="tag-option" type="checkbox" value="' + option.value + '" onChange="updateTags()" /><label class="side-label" for="chk_' + option.value + '">' + option.name + ' <span>[' + option.value + ']</span></label></div>');
-        $('#tag-options-box').append(opt);
-        if (newTag) {
-            $('#section_description #chk_' + option.value).prop('checked', true);
-            updateTags();
-        }
-    });
-};
-
-/**
  * update tags in thisIngestion
  */
-const updateTags = () => {
-    const selectedTags = [];
-    $.each($('input[name="tag-options"]:checked'), function() {
-        selectedTags.push($(this).val());
-    });
-    console.log('list of selected tags', selectedTags);
-    thisIngestion.pipeline.tags = selectedTags;
+const updateTags = (val, bool) => {
+    console.log('val, bool', val, bool);
+    if (bool) {
+        let newTag = tagOptions.find((e) => { return e.id == val; });
+        console.log('newTag', newTag);
+        let newTagTicket = $('<div class="tag-ticket" id="tag_ticket_' + val + '">' + newTag.name + ' [' + newTag.value + '] <i class="fas fa-times-circle" title="remove" onClick="updateTags(\'' + newTag.id + '\', false)"></i></div>');
+        $('#selected-tags').append(newTagTicket);
+        tagOptions = tagOptions.filter((e) => { return e.id != val; });
+        selectedTags.push(newTag);
+        thisIngestion.pipeline.tags.push(val);
+        buildTagsChoiceList();
+    } else {
+        let oldTag = selectedTags.find((e) => { return e.id == val; });
+        tagOptions.push(oldTag);
+        $('#tag_ticket_' + val).remove();
+        buildTagsChoiceList();
+        thisIngestion.pipeline.tags = thisIngestion.pipeline.tags.filter((e) => { return e.id != val; });
+    }
 };
+
+const buildTagsChoiceList = () => {
+    const tagChoices = $('#tag-choices');
+    tagChoices.html('');
+    tagOptions.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+    tagOptions.map((option) => {
+        let opt = $('<option value="' + option.id + '">' + option.name + ' [' + option.value + ']</option>');
+        tagChoices.append(opt);
+    });
+}
 
 /**
  * add a new tag to options list and select it
@@ -276,11 +267,12 @@ const addNewTag = () => {
     let tn = $('#add-tag-name');
     let tv = $('#add-tag-value');
     const newTag = {
+        id : Math.floor(Math.random() * 1001),
         name : tn.val(),
         value: tv.val()
     };
     tagOptions.push(newTag);
-    buildTags([newTag]);
+    updateTags(newTag.id, true);
     tn.val('');
     tv.val('');
 };
