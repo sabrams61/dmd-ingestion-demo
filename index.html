@@ -36,10 +36,10 @@
 
             <!-- section 1: names -->
             <section id="section_names" class="active">
-                <h3>Enter Project Name and Ingestion Name. Domain Name is optional. We will compare the name(s) to other Ingestions in our database to ensure there are no duplicates.</h3>
+                <h3>Enter Project Name and Ingestion Name. Domain Name is optional. We will compare the name(s) to other Ingestions in our database to ensure there are no duplicates. You will also need to include the ingestion's owner's email to receive confirmation.</h3>
                 <form autocomplete="off" name="names" onSubmit="return false;">
                     <input autocomplete="off" name="hidden" type="text" style="display:none;">
-                    <div class="form-groups last">
+                    <div class="form-groups">
                         <!-- project name -->
                         <div class="form-group relative">
                             <label class="required">Project Name</label>
@@ -62,6 +62,15 @@
                         <div class="form-group">
                             <label class="required">Ingestion Name</label>
                             <input type="text" name="name" id="name" onBlur="thisIngestion.pipeline.name = this.value" />
+                        </div>
+                    </div>
+                    <div class="form-groups last">
+                        <!-- owners email -->
+                        <div class="form-group">
+                            <label class="required">Ingestion Owner's Email</label>
+                            <div>
+                                <input type="email" name="owner_email" id="owner_email" onBlur="thisIngestion.pipeline.owner_email = this.value" />
+                            </div>
                         </div>
                     </div>
                     <div class="actions">
@@ -279,11 +288,21 @@
                         </div>
                     </div>
                     <!-- date picker -->
-                    <div class="form-groups last">
+                    <div class="form-groups">
                         <div class="form-group">
                             <label>Select Date and Time for First Ingestion</label>
                             <div>
                                 <input type="datetime-local" name="date-time" id="date-time" onBlur="thisIngestion.schedule.timestamp = this.value" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-groups last">
+                        <!-- schedule email -->
+                        <div class="form-group">
+                            <label>If you wish to receive notification after each Ingestion, include an email</label>
+                            <h3><input type="checkbox" id="copy_email" name="copy_email" onChange="$(this).prop('checked') ? $('#schedule_email').val(thisIngestion.pipeline.owner_email) : $('#schedule_email').val('')" /> <label for="copy_email">Check to use the same email</label></h3>
+                            <div>
+                                <input type="email" name="schedule_email" id="schedule_email" onBlur="thisIngestion.schedule.schedule_email = this.value" />
                             </div>
                         </div>
                     </div>
@@ -300,26 +319,9 @@
             <section id="section_submit">
                 <form name="submit" onSubmit="return false;">
                     <!-- review worksheet -->
-                    <div class="form-groups">
+                    <div class="form-groups last">
                         <div class="form-group">
                             <div id="review_worksheet" class="review"></div>
-                        </div>
-                    </div>
-                    <div class="form-groups last">
-                        <!-- confirmation email -->
-                        <div class="form-group">
-                            <label class="required">Include an email to receive confirmation of the submission</label>
-                            <div>
-                                <input type="email" name="confirmation_email" id="confirmation_email" onBlur="thisIngestion.pipeline.confirmation_email = this.value" />
-                            </div>
-                        </div>
-                        <!-- confirmation email -->
-                        <div class="form-group">
-                            <label>If you wish to receive notification after each Ingestion, include an email (does not have to be the same)</label>
-                            <h3><input type="checkbox" id="copy_email" name="copy_email" onChange="$(this).prop('checked') ? $('#schedule_email').val($('#confirmation_email').val()) : $('#schedule_email').val('')" /> <label for="needs_un_pw">Check to use the same email</label></h3>
-                            <div>
-                                <input type="email" name="schedule_email" id="schedule_email" onBlur="thisIngestion.pipeline.confirmation_email = this.value" />
-                            </div>
                         </div>
                     </div>
                     <div class="actions">

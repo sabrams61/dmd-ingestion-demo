@@ -56,6 +56,7 @@ const resetThisIngestion = () => {
  */
 const clearFormData = () => {
     $('input[type="text"]').val('');
+    $('input[type="email"]').val('');
     $('input[type="password"]').val('');
     $('input[type="datetime-local"]').val('');
     $('select').val('');
@@ -123,6 +124,7 @@ const initiateIngestion = () => {
     const projName = $('#section_names input#project_name').val();
     const domName = $('#section_names input#domain_name').val();
     const ingName = $('#section_names input#name').val();
+    const oEmail = $('#section_names input#owner_email').val();
     const nameArea = $('#ingestion-names');
     if (ingName || projName) {
         nameArea.removeClass();
@@ -145,6 +147,7 @@ const initiateIngestion = () => {
             thisIngestion.pipeline.project_name = projName;
             thisIngestion.pipeline.domain_name = domName;
             thisIngestion.pipeline.name = ingName;
+            thisIngestion.pipeline.owner_email = oEmail;
             console.log('brand new ingestion', thisIngestion);
             $('#section_description').addClass('initiated');
             $('#section_description').addClass('new');
@@ -195,6 +198,7 @@ const fillOutFormFromData = () => {
     $('#section_names input#project_name').val(thisIngestion.pipeline.project_name);
     $('#section_names input#domain_name').val(thisIngestion.pipeline.domain_name);
     $('#section_names input#name').val(thisIngestion.pipeline.name);
+    $('#section_names input#owner_email').val(thisIngestion.pipeline.owner_email);
     // description
     if (!!thisIngestion.pipeline.tags) {
         thisIngestion.pipeline.tags.map((tag) => {
@@ -232,6 +236,7 @@ const fillOutFormFromData = () => {
     // scheduling
     $('#section_scheduling #frequencies #chk_' + thisIngestion.schedule.repeat).prop('checked', true);
     $('#section_scheduling #date-time').val(thisIngestion.schedule.timestamp);
+    $('#section_scheduling #schedule_email').val(thisIngestion.schedule.schedule_email);
 };
 
 /**
@@ -439,7 +444,9 @@ const buildReview = () => {
                 case 'object-array':
                     console.log('field key, value', field.field_key, dataSec[field.field_key]);
                     let thisObj = field.get_values_from.find((e) => { return e.value === dataSec[field.field_key]; });
-                    fieldVal.text(thisObj.name);
+                    if (thisObj) {
+                        fieldVal.text(thisObj.name);
+                    }
                     break;
                 default:
                     fieldVal.text('hello');

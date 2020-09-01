@@ -10,7 +10,8 @@ let ingestions = [
             "targetid": 1,
             "scheduleid": 1,
             "comments": "this is a default ingestion already included for testing purposes",
-            "tags": ['alpha', 'beta']
+            "tags": ['alpha', 'beta'],
+            "owner_email": 'sabrams61@massmutual.com'
         },
         "source": {
             "id": 1,
@@ -63,7 +64,8 @@ let ingestions = [
             "timestamp": "2020-08-21T14:07:54.000Z",
             "cron_string": "",
             "excludeTimestamps": [],
-            "scheduled": true
+            "scheduled": true,
+            "schedule_email": 'bigbluff@massmutual.com'
         }
     }
 ];
@@ -249,6 +251,11 @@ const reviewWorksheet = {
                     type: 'text'
                 },
                 {
+                    name: 'Ingestion Owner\'s Email',
+                    field_key: 'owner_email',
+                    type: 'text'
+                },
+                {
                     name: 'Ingestion Name',
                     field_key: 'name',
                     type: 'text'
@@ -370,6 +377,11 @@ const reviewWorksheet = {
                     name: 'Ingestion Date',
                     field_key: 'timestamp',
                     type: 'date'
+                },
+                {
+                    name: 'Scheduling Confirmation Email',
+                    field_key: 'schedule_email',
+                    type: 'text'
                 }
             ]
         }

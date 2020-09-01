@@ -312,6 +312,9 @@ label.required:after {
     border-bottom: 1px solid #d9d9d6;
 }
 /* clear storage link */
+.clear-storage {
+    opacity: 0;
+}
 .clear-storage span {
     cursor: pointer;
     color: #b1b3b3;
