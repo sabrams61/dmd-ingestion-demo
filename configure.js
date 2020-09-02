@@ -100,14 +100,7 @@ let projectNames = [
 // selected source location object with dependencies
 let thisLoc = null;
 // for schema fields table
-let schemaFields = [
-    {
-        id : 1,
-        name : '',
-        type : '',
-        nnpi : ''
-    }
-];
+let schemaFields = [];
 // let schemaFields = []
 //     {
 //         id: 1,
@@ -122,10 +115,11 @@ let schemaFields = [
 //         nnpi: 'false'
 //     }
 // ];
-// for setting id of each new schema
-// let schemaCount = schemaFields.length + 1;
 
-let schemaEditType = 'add';
+// object to be used for creating new schema field
+let editedSchemaField = {};
+// set to either 'add' or 'edit'
+let schemaEditMode = 'add';
 
 // static list of tags user can choose from when describing the Ingestion
 let tagOptions = [
@@ -267,14 +261,14 @@ const targetLocations = [
 ];
 
 const frequencies = [
-    {name:'Once', value:'once'},
-    {name:'Hourly', value:'hourly'}, 
-    {name:'Weekly', value:'weekly'},
-    {name:'Monthly', value:'monthly'},
-    {name:'Quarterly', value:'quarterly'},
-    {name:'Yearly', value:'yearly'},
-    {name:'Cron', value:'cron'},
-    {name:'Run Now', value:'runnow'}
+    {id:1,name:'Once', value:'once'},
+    {id:2,name:'Hourly', value:'hourly'}, 
+    {id:3,name:'Weekly', value:'weekly'},
+    {id:4,name:'Monthly', value:'monthly'},
+    {id:5,name:'Quarterly', value:'quarterly'},
+    {id:6,name:'Yearly', value:'yearly'},
+    {id:7,name:'Cron', value:'cron'},
+    {id:8,name:'Run Now', value:'runnow'}
 ];
 
 // set up for review worksheet
@@ -303,7 +297,8 @@ const reviewWorksheet = {
                     name: 'Tags',
                     field_key: 'tags',
                     type: 'object-array-mult',
-                    get_values_from: tagOptions
+                    get_values_from: selectedTags,
+                    properties: ['name', 'value']
                 },
                 {
                     name: 'Description',
@@ -390,8 +385,9 @@ const reviewWorksheet = {
                 {
                     name: 'Schema Fields',
                     field_key: 'schema_fields',
-                    type: 'object-array-mult',
-                    get_values_from: schemaFields
+                    type: 'object-array-obj-mult',
+                    get_values_from: schemaFields,
+                    properties: ['name']
                 },
             ]
         },

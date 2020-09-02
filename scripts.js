@@ -96,69 +96,6 @@ const applyLocalStorage = () => {
 }
 
 /**
- * filter through saved list of project names on keydown
- */
-const filterProjectOptions = (val) => {
-    val = val.toLowerCase();
-    $.each($('#project-options .option'), function() {
-        let p = $(this).text().toLowerCase();
-        // console.log('typed val, this val', val, p);
-        if (p.includes(val)) {
-            $(this).show();
-        } else {
-            $(this).hide();
-        }
-    });
-};
-
-/**
- * set project name from selected option in list and hide list
- */
-const setProjectName = (name) => {
-    $('#section_names #project_name').val(name);
-    $('#project-options').hide()
-}
-
-/**
- * after using enters ingestion name and/or project name, submits to  begin ingestion process
- * compares to list of all current ingestion to see if there's a match
- */
-const initiateIngestion = () => {
-    const projName = $('#section_names input#project_name').val();
-    const domName = $('#section_names input#domain_name').val();
-    const ingName = $('#section_names input#name').val();
-    const nameArea = $('#ingestion-names');
-    if (projName || ingName) {
-        nameArea.removeClass();
-        nameArea.html('');
-        nameArea.append($('<span>' + projName + '</span>'));
-        if (domName) {
-            nameArea.append($('<span>' + domName + '</span>'));
-        }
-        nameArea.append($('<span>' + ingName + '</span>'));
-        $('#section_description').removeClass('new matched initiated');
-        const match = ingestions.find((e) => { return e.pipeline.project_name === projName && e.pipeline.domain_name === domName && e.pipeline.name === ingName; });
-        if (match) {
-            thisIngestion = JSON.parse(JSON.stringify(match));
-            console.log('we found a match', thisIngestion);
-            fillOutFormFromData();
-            $('#section_description').addClass('initiated');
-            $('#section_description').addClass('matched');
-        } else {
-            clearFormData();
-            thisIngestion.pipeline.project_name = projName;
-            thisIngestion.pipeline.domain_name = domName;
-            thisIngestion.pipeline.name = ingName;
-            console.log('brand new ingestion', thisIngestion);
-            $('#section_description').addClass('initiated');
-            $('#section_description').addClass('new');
-        }
-        changeSection(1);
-        nameArea.show();
-    }
-}
-
-/**
  * switch to a different section, either forward or backward, or directly to specific section
  * @param {direction} integer 1 or -1 to move to previous or next section
  * @param {goto} integer of direct section to go to
@@ -229,218 +166,15 @@ const fillOutFormFromData = () => {
 };
 
 /**
- * update tags in thisIngestion
- * @{id} id of the tag
- * @{selected} true if selected, false if removed
- * @{ignoreThisIngestion} if true, don't update thisIngestion
+ * build out a worksheet that reviews all the Ingestion data
  */
-const updateTags = (id, selected, ignoreThisIngestion) => {
-    console.log('id, selected, ignoreThisIngestion', id, selected, ignoreThisIngestion);
-    if (selected) {
-        let newTag = availableTags.find((e) => { return e.id == id; });
-        console.log('newTag', newTag);
-        let newTicket = $('<div class="tag-ticket" id="tag_ticket_' + id + '"><span>' + newTag.name + ' [' + newTag.value + ']</span> <i class="far fa-times-circle red" title="Remove" onClick="updateTags(\'' + newTag.id + '\', false)"></i></div>');
-        $('#selected-tags').append(newTicket);
-        availableTags = availableTags.filter((e) => { return e.id != id; });
-        selectedTags.push(newTag);
-        if (!ignoreThisIngestion) {
-            thisIngestion.pipeline.tags.push(parseInt(id));
-        }
-        console.log('thisIngestion.pipeline.tags', thisIngestion.pipeline.tags);
-        buildTagsChoiceList();
-    } else {
-        let oldTag = selectedTags.find((e) => { return e.id == id; });
-        availableTags.push(oldTag);
-        $('#tag_ticket_' + id).remove();
-        buildTagsChoiceList();
-        thisIngestion.pipeline.tags = thisIngestion.pipeline.tags.filter((e) => { return e != id; });
-        console.log('thisIngestion.pipeline.tags', thisIngestion.pipeline.tags);
-    }
-};
-
-const buildTagsChoiceList = () => {
-    const tagChoices = $('#tag-choices');
-    tagChoices.html('');
-    availableTags.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
-    availableTags.map((option) => {
-        let opt = $('<option value="' + option.id + '">' + option.name + ' [' + option.value + ']</option>');
-        tagChoices.append(opt);
-    });
-}
-
-/**
- * add a new tag to options list and select it
- */
-const addNewTag = () => {
-    let tn = $('#add-tag-name');
-    let tv = $('#add-tag-value');
-    const newTag = {
-        id : Math.floor(Math.random() * 1001),
-        name : tn.val(),
-        value: tv.val()
-    };
-    tagOptions.push(newTag);
-    updateTags(newTag.id, true);
-    tn.val('');
-    tv.val('');
-};
-
-/**
- * when a user selects a location, saves location to ingestion
- * determines lists of dependent location and format options
- */
-const showLocDependencies = (loc) => {
-    if (loc) {
-        thisIngestion.source.location = loc;
-        thisLoc = sourceLocations.find((e) => { return e.value === loc; });
-    }
-    let locInp = $('#loc-dependencies');
-    let formatInp = $('#format-options-box');
-    locInp.html('');
-    formatInp.html('');
-    thisLoc.loc_dependencies.map((d) => {
-        let inp = $('<div class="form-group"><label>' + d.label + '</label><input type="text" id="' + d.name + '" name="' + d.name + '" onBlur="thisIngestion.source[\'' + d.name + '\'] = this.value" /></div>');
-        locInp.append(inp);
-    });
-    thisLoc.format_dependencies.map((d) => {
-        const opt = $('<div class="list-item"><input id="chk_' + d.value + '" name="loc-options" class="loc-option" type="radio" value="' + d.value + '" onClick="showFormatDependencies(\'' + d.value + '\')" /><label class="side-label" for="chk_' + d.value + '">' + d.name + '</label></div>');
-        formatInp.append(opt);
-    });
-}
-
-/**
- * if source format is 'delimited' than show delimiter options
- */
-const showFormatDependencies = (opt) => {
-    if (opt) {
-        thisIngestion.source.format = opt;
-    }
-    const delimiterOptions = $('.form-group.delimiters');
-    if (thisIngestion.source.format === 'delimited') {
-        delimiterOptions.show();
-        if (thisIngestion.source.delimiter) {
-            $('#chk_' + thisIngestion.source.delimiter).prop('checked', true);
-        }
-    } else {
-        thisIngestion.source.delimiter = null;
-        delimiterOptions.hide();
-    }
-};
-
-/**
- * show or hide the username and password fields for source location
- * @param {*} bool true means show username and password fields
- */
-const showUnPw = (bool) => {
-    const sl = $('#section_source_location');
-    if (bool) {
-        sl.addClass('secured');
-    } else {
-        sl.removeClass('secured');
-        thisIngestion.source.username = '';
-        thisIngestion.source.password = '';
-    }
-}
-
-/**
- * allow user to view password
- */
-const showPw = () => {
-    const inp = $('#source_password');
-    const type = inp.prop('type');
-    $('#source_password').prop('type', type === 'password' ? 'text' : 'password');
-};
-
-/**
- * build the schema fields table
- */
-const buildSchemaFields = () => {
-    $('#selected-schema-fields').html('');
-    thisIngestion.source.schema_fields.map((schema) => {
-        let newTicket = $('<div class="schema-ticket" id="schema_ticket_' + schema.id + '"><span>' + schema.name + '</span> <i class="fas fa-edit" title="edit" onClick="editSchemaField(\'' + schema.id + '\', false)"></i> <i class="far fa-times-circle red" title="remove" onClick="deleteSchemaField(\'' + schema.id + '\', false)"></i></div>');
-        $('#selected-schema-fields').append(newTicket);
-        console.log('thisIngestion.source.schema_fields', thisIngestion.source.schema_fields);
-    });
-};
-
-/**
- * add new schema field row in table
- */
-const editSchemaField = (id) => {
-    editedSchemaField = id ? thisIngestion.source.schema_fields.find((e) => { return parseInt(e.id) === parseInt(id); }) : {name:'',type:'',nnpi:'false',id:Math.floor(Math.random() * 1001)};
-    schemaEditType = id ? 'edit' : 'add';
-    const schemaTable = $('#schema-table tbody tr');
-    let options;
-    schemaTable.html('');
-    schemaTypes.map((type) => {
-        options += '<option value="' + type.value + '">' + type.name + '</option>';
-    });
-    const types = (id) => {
-        return '<select id="schema_type" name="schema_type" onChange="editedSchemaField.type = $(this).val()">' + options + '</select>';
-    };
-    const nnpi = (id) => {
-        return '<select id="schema_nnpi" name="schema_nnpi" onChange="editedSchemaField.nnpi = $(this).val()"><option value="true">Yes</option><option value="false">No</option></select>';
-    };
-    let row = $('<td class="name"><input name="name" type="text" value="' + editedSchemaField.name + '" onBlur="editedSchemaField.name = $(this).val()" /></td>' +
-                '<td class="type">' + types(editedSchemaField.id) + '</td>' + 
-                '<td class="nnpi">' + nnpi(editedSchemaField.id) + '</td>' + 
-                '<td class="actions"><i class="far fa-check-circle pointer green" onClick="updateSchemaFieldData(\'' + editedSchemaField.id + '\')" title="Done"></i> <i class="far fa-times-circle pointer dark-gray" onClick="cancelEditSchema()" title="Cancel"></i></td>');    
-    schemaTable.append(row);
-    $('#schema-table').show();
-    $('.type select', schemaTable).val(editedSchemaField.type);
-    $('.nnpi select', schemaTable).val(editedSchemaField.nnpi);
-    console.log('this row type', $('.type select', schemaTable).val());
-    console.log('this row nnpi', $('.nnpi select', schemaTable).val());
-};
-
-/**
- * delete existing schema field
- */
-const deleteSchemaField = (id) => {
-    console.log('schema to delete', id);
-    thisIngestion.source.schema_fields = thisIngestion.source.schema_fields.filter((e) => { return parseInt(e.id) !== parseInt(id); });
-    console.log('remaining schema fields', thisIngestion.source.schema_fields);
-    $('#selected-schema-fields #schema_ticket_' + id).remove();
-};
-
-/**
- * update the ingestion schema fields data of selected schema or add newly created one to list
- */
-const updateSchemaFieldData = (id) => {
-    if (schemaEditType === 'add') {
-        thisIngestion.source.schema_fields.push(editedSchemaField);
-    } else {
-        thisSchema = thisIngestion.source.schema_fields.find((e) => { return parseInt(e.id) !== parseInt(id); });
-        thisSchema = {...thisSchema, editedSchemaField}
-    }
-    buildSchemaFields();
-    editedSchemaField = {};
-    $('#schema-table').hide();
-};
-
-/**
- * cancel edits to schema field
- */
- const cancelEditSchema = () => {
-    editedSchemaField = {};
-    $('#schema-table').hide();
- }
-
-const showText = (section, field) => {
-    return thisIngestion[section][field];
-};
-
 const buildReview = () => {
     const rev = $('#review_worksheet');
     rev.html('');
     reviewWorksheet.sections.map((section) => {
-        // let secGroup = $('<div class="review-section" id="review_' + section.section_key + '"><div class="section-name">' + section.name + '</div><div class="section-fields"></div></div>');
         let secName = $('<div class="section-name">' + section.name + '</div>');
         let dataSec = thisIngestion[section.section_key];
-        // console.log('dataSec', secGroup);
-        //rev.append(secGroup);
         rev.append(secName);
-        // let theseFields = $('#review_' + section.section_key + ' .section-fields');
         section.fields.map((field) => {
             let fieldName = $('<div class="label">' + field.name + '</div>');
             let fieldVal = $('<div class="value"></div>');            
@@ -465,33 +199,23 @@ const buildReview = () => {
                         fieldVal.text(thisObj.name);
                     }
                     break;
+                case 'object-array-obj-mult':
+                    console.log('field key, value', field.field_key, dataSec[field.field_key]);
+                    let thisArr = dataSec[field.field_key];
+                    console.log('thisArr', thisArr);
+                    thisArr.map((obj) => {
+                        let thisObj = $('<span class="val-obj"></span>');
+                        field.properties.map((prop) => {
+                            thisObj.append($('<span class="prop">' + obj[prop] + '</span>'));
+                        }); 
+                        fieldVal.append(thisObj);
+                    });
+                    break;
                 default:
                     fieldVal.text('hello');
             }
-            // theseFields.append(fieldName);
-            // theseFields.append(fieldVal);
             rev.append(fieldName);
             rev.append(fieldVal);
         });
     });
-};
-
-/**
- * complete ingestion scheduling
- */
-const completeIngestion = () => {
-    ingestionStatus = 'complete';
-    const areaNames = $('#ingestion-names');
-    let comMsg = 'Your ingestion ( ';
-    if (thisIngestion.pipeline.name) {
-        comMsg += '<span>' + thisIngestion.pipeline.name + '</span>';
-    }
-    if (thisIngestion.pipeline.project_name) {
-        comMsg += '<span>' + thisIngestion.pipeline.project_name + '</span>';
-    }
-    comMsg += ' ) has successfully been scheduled.';
-    areaNames.addClass('complete').html(comMsg);
-    clearFormData();
-    changeSection(null, 0);
-    $('.breadcrumb li:not(.names)').hide();
 };
