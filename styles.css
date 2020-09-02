@@ -18,12 +18,25 @@ h3 {
     color: #666;
     margin: 20px 0;
 }
+i:hover,
+button:hover {
+    opacity: 0.9;
+}
 .inbody-info {
     font-size: 0.9em;
     color: #818387;
 }
 .pointer {
     cursor: pointer;
+}
+.green {
+    color: #43b02a;
+}
+.red {
+    color: #ee2737;
+}
+.dark-gray {
+    color: #646469;
 }
 /* action buttons on bottom */
 .actions {
@@ -98,7 +111,7 @@ header {
 }
 #ingestion-names {
     padding: 10px 0;
-    color: #002f6c;
+    color: #818387;
     background: #fff;
     display: none;
     font-size: 1.2em;
@@ -210,7 +223,8 @@ label.required:after {
 .selected-tags {
     margin-left: 15px;
 }
-.selected-tags .tag-ticket {
+.selected-tags .tag-ticket,
+.selected-schema-fields .schema-ticket {
     display: inline-block;
     padding: 5px;
     background: #ff671f;
@@ -218,8 +232,13 @@ label.required:after {
     border-radius: 5px;
     color: #fff;
 }
-.selected-tags .tag-ticket i {
-    color: #fff;
+.selected-tags .tag-ticket span,
+.selected-schema-fields .schema-ticket span {
+    margin-right: 10px;
+}
+.selected-tags .tag-ticket i,
+.selected-schema-fields .schema-ticket i {
+    color: #2b2b2b;
     cursor: pointer;
 }
 .tag-choices-box select {
@@ -297,8 +316,7 @@ label.required:after {
 #schema-table .actions {
     width: 50px;
     text-align: center;
-    color: #ee2737;
-    font-size: 1.2em;
+    font-size: 1.6em;
 }
 #schema-table input,
 #schema-table select {
@@ -307,10 +325,13 @@ label.required:after {
 }
 .add-schema {
     cursor: pointer;
-    margin-left: 11px;
+    margin: 10px 0;
 }
 .add-schema i {
     font-size: 1.2em;
+}
+#schema-table {
+    display: none;
 }
 .sample-upload div {
     position: relative;

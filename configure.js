@@ -123,7 +123,9 @@ let schemaFields = [
 //     }
 // ];
 // for setting id of each new schema
-let schemaCount = schemaFields.length + 1;
+// let schemaCount = schemaFields.length + 1;
+
+let schemaEditType = 'add';
 
 // static list of tags user can choose from when describing the Ingestion
 let tagOptions = [
@@ -183,7 +185,8 @@ let tagOptions = [
         value : 'Kappa'
     }
 ];
-
+// all available tags
+let availableTags = [...tagOptions];
 // selected tags in this ingestion
 let selectedTags = [];
 

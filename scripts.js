@@ -63,8 +63,9 @@ const clearFormData = () => {
     $('textarea').val('');
     $('input[type="checkbox"]').prop('checked', false);
     $('input[type="radio"]').prop('checked', false);
-    tagOptions = tagOptions.concat(selectedTags);
+    allTags = allTags.concat(selectedTags);
     selectedTags = [];
+    buildTagsChoiceList();
     schemaFields = [{
         id : 1,
         name : '',
@@ -188,7 +189,7 @@ const fillOutFormFromData = () => {
     // description
     if (!!thisIngestion.pipeline.tags) {
         thisIngestion.pipeline.tags.map((tagVal) => {
-            updateTags(tagVal, true);
+            updateTags(tagVal, true, true);
         });
     }
     buildTagsChoiceList();
@@ -214,7 +215,7 @@ const fillOutFormFromData = () => {
     $('#section_source_format #format-options-box #chk_' + thisIngestion.source.format).prop('checked', true);
     $('#section_source_format #delimiters #chk_' + thisIngestion.source.delimiter).prop('checked', true);
     $('#section_source_format #encoding #chk_' + thisIngestion.source.encoding).prop('checked', true);
-    if (thisIngestion.source.schema_fields) {
+    if (!!thisIngestion.source.schema_fields) {
         schemaFields = thisIngestion.source.schema_fields;
     }
     buildSchemaFields();
@@ -229,32 +230,39 @@ const fillOutFormFromData = () => {
 
 /**
  * update tags in thisIngestion
+ * @{id} id of the tag
+ * @{selected} true if selected, false if removed
+ * @{ignoreThisIngestion} if true, don't update thisIngestion
  */
-const updateTags = (val, bool) => {
-    console.log('val, bool', val, bool);
-    if (bool) {
-        let newTag = tagOptions.find((e) => { return e.id == val; });
+const updateTags = (id, selected, ignoreThisIngestion) => {
+    console.log('id, selected, ignoreThisIngestion', id, selected, ignoreThisIngestion);
+    if (selected) {
+        let newTag = availableTags.find((e) => { return e.id == id; });
         console.log('newTag', newTag);
-        let newTagTicket = $('<div class="tag-ticket" id="tag_ticket_' + val + '">' + newTag.name + ' [' + newTag.value + '] <i class="fas fa-times-circle" title="remove" onClick="updateTags(\'' + newTag.id + '\', false)"></i></div>');
-        $('#selected-tags').append(newTagTicket);
-        tagOptions = tagOptions.filter((e) => { return e.id != val; });
+        let newTicket = $('<div class="tag-ticket" id="tag_ticket_' + id + '"><span>' + newTag.name + ' [' + newTag.value + ']</span> <i class="far fa-times-circle red" title="Remove" onClick="updateTags(\'' + newTag.id + '\', false)"></i></div>');
+        $('#selected-tags').append(newTicket);
+        availableTags = availableTags.filter((e) => { return e.id != id; });
         selectedTags.push(newTag);
-        thisIngestion.pipeline.tags.push(val);
+        if (!ignoreThisIngestion) {
+            thisIngestion.pipeline.tags.push(parseInt(id));
+        }
+        console.log('thisIngestion.pipeline.tags', thisIngestion.pipeline.tags);
         buildTagsChoiceList();
     } else {
-        let oldTag = selectedTags.find((e) => { return e.id == val; });
-        tagOptions.push(oldTag);
-        $('#tag_ticket_' + val).remove();
+        let oldTag = selectedTags.find((e) => { return e.id == id; });
+        availableTags.push(oldTag);
+        $('#tag_ticket_' + id).remove();
         buildTagsChoiceList();
-        thisIngestion.pipeline.tags = thisIngestion.pipeline.tags.filter((e) => { return e.id != val; });
+        thisIngestion.pipeline.tags = thisIngestion.pipeline.tags.filter((e) => { return e != id; });
+        console.log('thisIngestion.pipeline.tags', thisIngestion.pipeline.tags);
     }
 };
 
 const buildTagsChoiceList = () => {
     const tagChoices = $('#tag-choices');
     tagChoices.html('');
-    tagOptions.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
-    tagOptions.map((option) => {
+    availableTags.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+    availableTags.map((option) => {
         let opt = $('<option value="' + option.id + '">' + option.name + ' [' + option.value + ']</option>');
         tagChoices.append(opt);
     });
@@ -347,37 +355,42 @@ const showPw = () => {
  * build the schema fields table
  */
 const buildSchemaFields = () => {
-    if (schemaFields.length) {
-        const schemaTable = $('#schema-table tbody');
-        let options;
-        schemaTable.html('');
-        schemaTypes.map((type) => {
-            options += '<option value="' + type.value + '">' + type.name + '</option>';
-        });
-        const types = (id) => {
-            return '<select name="type" onBlur="updateSchemaFieldData(' + id + ', \'type\', this.value)">' + options + '</select>';
-        };
-        const nnpi = (id) => {
-            return '<select name="nnpi" onBlur="updateSchemaFieldData(' + id + ', \'nnpi\', this.value)"><option value="true">Yes</option><option value="false">No</option></select>';
-        };
-        schemaFields.map((schema) => {
-            let row = $('<tr id="schema_' + schema.id + '"><td class="name"><input name="name" type="text" value="' + schema.name + '" onBlur="updateSchemaFieldData(' + schema.id + ', \'name\', this.value)" /></td><td class="type">' + types(schema.id) + '</td><td class="nnpi">' + nnpi(schema.id) + '</td><td class="actions"><i class="fas fa-trash-alt pointer " onClick="deleteSchemaField(\'' + schema.id + '\')" title="Delete"></i></td></tr>');
-            $('.type select', row).val(schema.type);
-            $('.nnpi select', row).val(schema.nnpi);
-            // console.log('this row type', $('.type select', row).val());
-            // console.log('this row nnpi', $('.nnpi select', row).val());
-            schemaTable.append(row);
-        });
-    }
+    $('#selected-schema-fields').html('');
+    thisIngestion.source.schema_fields.map((schema) => {
+        let newTicket = $('<div class="schema-ticket" id="schema_ticket_' + schema.id + '"><span>' + schema.name + '</span> <i class="fas fa-edit" title="edit" onClick="editSchemaField(\'' + schema.id + '\', false)"></i> <i class="far fa-times-circle red" title="remove" onClick="deleteSchemaField(\'' + schema.id + '\', false)"></i></div>');
+        $('#selected-schema-fields').append(newTicket);
+        console.log('thisIngestion.source.schema_fields', thisIngestion.source.schema_fields);
+    });
 };
 
 /**
  * add new schema field row in table
  */
-const addSchemaField = () => {
-    let newField = {name:'',type:'',nnpi:'false',id:schemaCount};
-    schemaFields.push(newField);
-    buildSchemaFields();
+const editSchemaField = (id) => {
+    editedSchemaField = id ? thisIngestion.source.schema_fields.find((e) => { return parseInt(e.id) === parseInt(id); }) : {name:'',type:'',nnpi:'false',id:Math.floor(Math.random() * 1001)};
+    schemaEditType = id ? 'edit' : 'add';
+    const schemaTable = $('#schema-table tbody tr');
+    let options;
+    schemaTable.html('');
+    schemaTypes.map((type) => {
+        options += '<option value="' + type.value + '">' + type.name + '</option>';
+    });
+    const types = (id) => {
+        return '<select id="schema_type" name="schema_type" onChange="editedSchemaField.type = $(this).val()">' + options + '</select>';
+    };
+    const nnpi = (id) => {
+        return '<select id="schema_nnpi" name="schema_nnpi" onChange="editedSchemaField.nnpi = $(this).val()"><option value="true">Yes</option><option value="false">No</option></select>';
+    };
+    let row = $('<td class="name"><input name="name" type="text" value="' + editedSchemaField.name + '" onBlur="editedSchemaField.name = $(this).val()" /></td>' +
+                '<td class="type">' + types(editedSchemaField.id) + '</td>' + 
+                '<td class="nnpi">' + nnpi(editedSchemaField.id) + '</td>' + 
+                '<td class="actions"><i class="far fa-check-circle pointer green" onClick="updateSchemaFieldData(\'' + editedSchemaField.id + '\')" title="Done"></i> <i class="far fa-times-circle pointer dark-gray" onClick="cancelEditSchema()" title="Cancel"></i></td>');    
+    schemaTable.append(row);
+    $('#schema-table').show();
+    $('.type select', schemaTable).val(editedSchemaField.type);
+    $('.nnpi select', schemaTable).val(editedSchemaField.nnpi);
+    console.log('this row type', $('.type select', schemaTable).val());
+    console.log('this row nnpi', $('.nnpi select', schemaTable).val());
 };
 
 /**
@@ -385,21 +398,33 @@ const addSchemaField = () => {
  */
 const deleteSchemaField = (id) => {
     console.log('schema to delete', id);
-    schemaFields = schemaFields.filter((e) => { return parseInt(e.id) !== parseInt(id); });
-    console.log('remaining schema fields', schemaFields);
-    $('#schema-table tr#schema_' + id).remove();
-    thisIngestion.source.schema_fields = schemaFields;
+    thisIngestion.source.schema_fields = thisIngestion.source.schema_fields.filter((e) => { return parseInt(e.id) !== parseInt(id); });
+    console.log('remaining schema fields', thisIngestion.source.schema_fields);
+    $('#selected-schema-fields #schema_ticket_' + id).remove();
 };
 
 /**
- * update the ingestion schema fields data
+ * update the ingestion schema fields data of selected schema or add newly created one to list
  */
-const updateSchemaFieldData = (id, field, val) => {
-    console.log('id, field, val: ', id, field, val);
-    let thisSchema = schemaFields.find((e) => { return e.id === id; });
-    thisSchema[field] = val;
-    thisIngestion.source.schema_fields = schemaFields;
+const updateSchemaFieldData = (id) => {
+    if (schemaEditType === 'add') {
+        thisIngestion.source.schema_fields.push(editedSchemaField);
+    } else {
+        thisSchema = thisIngestion.source.schema_fields.find((e) => { return parseInt(e.id) !== parseInt(id); });
+        thisSchema = {...thisSchema, editedSchemaField}
+    }
+    buildSchemaFields();
+    editedSchemaField = {};
+    $('#schema-table').hide();
 };
+
+/**
+ * cancel edits to schema field
+ */
+ const cancelEditSchema = () => {
+    editedSchemaField = {};
+    $('#schema-table').hide();
+ }
 
 const showText = (section, field) => {
     return thisIngestion[section][field];

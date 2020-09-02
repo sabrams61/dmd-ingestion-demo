@@ -36,7 +36,7 @@
 
             <!-- section 1: names -->
             <section id="section_names" class="active">
-                <h3>Enter Project Name and Ingestion Name. Domain Name is optional. We will compare the name(s) to other Ingestions in our database to ensure there are no duplicates. You will also need to include the ingestion owner's email to receive confirmation.</h3>
+                <h3>Enter Project Name and Ingestion Name. Domain Name is optional. We will compare the names to other Ingestions in our database to ensure there are no duplicates.</h3>
                 <form autocomplete="off" name="names" onSubmit="return false;">
                     <input autocomplete="off" name="hidden" type="text" style="display:none;">
                     <div class="form-groups last">
@@ -74,7 +74,7 @@
             <!-- section 2: description -->
             <section id="section_description">
                 <!-- <h3 class="new">Please select at least one tag and include some brief comments to describe the use for this Ingestion.</h3> -->
-                <h3 class="match">We have found an existing Ingestion that has matches the name(s) you entered and has already been scheduled. Please evaluate the tags and description below. If this is the correct Ingestion you are looking for, you may edit them and continue.<br /><br />
+                <h3 class="match">We have found an existing Ingestion that has matches the names you entered and has already been scheduled. Please evaluate the tags, description and email below. If this is the correct Ingestion you are looking for, you may edit them and continue.<br /><br />
                 If you do not wish to edit this Ingestion, please return to previous screen and submit again.</h3>
                 <form name="description" onSubmit="return false;">
                     <!-- tags -->
@@ -118,7 +118,7 @@
                         <!-- re-submit names -->
                         <button class="prev" onClick="changeSection(-1);return false;">Re-submit Name(s)</button>
                         <!-- to source location -->
-                        <button class="next" onClick="changeSection(1);fillOutFormFromData();return false;">Select Source Location</button>
+                        <button class="next" onClick="changeSection(1);return false;">Select Source Location</button>
                     </div>
                 </form>
             </section>
@@ -223,6 +223,8 @@
                     <div class="form-groups last">
                         <div class="form-group">
                             <label>Schema Fields</label>
+                            <div id="selected-schema-fields" class="selected-schema-fields"></div>
+                            <div class="add-schema" onClick="editSchemaField()"><i class="fas fa-plus-square pointer"></i> Add a new schema field</div>
                             <table id="schema-table" class="table">
                                 <thead>
                                     <th class="name">Name</th>
@@ -230,9 +232,15 @@
                                     <th class="nnpi">NNPI</th>
                                     <th class="actions"></th>
                                 </thead>
-                                <tbody><!-- schema field rows will generate here --></tbody>
+                                <tbody>
+                                    <tr id="schema_">
+                                        <!-- <td class="name"><input id="schema_name" name="name" type="text" /></td>
+                                        <td class="type">' + types(schema.id) + '</td>
+                                        <td class="nnpi">' + nnpi(schema.id) + '</td>
+                                        <td class="actions"><i class="far fa-check-circle pointer " onClick="updateSchemaFields(\'' + schema.id + '\')" title="Delete"></i></td> -->
+                                    </tr>
+                                </tbody>
                             </table>
-                            <div class="add-schema" onClick="addSchemaField()"><i class="fas fa-plus-square pointer"></i> Add a new schema field</div>
                         </div>
                     </div>
                     <div class="actions">
