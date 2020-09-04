@@ -1,9 +1,9 @@
 /**
- * filter through saved list of project names on keydown
+ * filter through saved list of domain names on keydown
  */
-const filterProjectOptions = (val) => {
+const filterDomainOptions = (val) => {
     val = val.toLowerCase();
-    $.each($('#project-options .option'), function() {
+    $.each($('#domain-options .option'), function() {
         let p = $(this).text().toLowerCase();
         // console.log('typed val, this val', val, p);
         if (p.includes(val)) {
@@ -17,9 +17,9 @@ const filterProjectOptions = (val) => {
 /**
  * set project name from selected option in list and hide list
  */
-const setProjectName = (name) => {
-    $('#section_names #project_name').val(name);
-    $('#project-options').hide()
+const setDomain = (name) => {
+    $('#section_names #domain').val(name);
+    $('#domain-options').hide()
 }
 
 /**
@@ -28,19 +28,15 @@ const setProjectName = (name) => {
  */
 const initiateIngestion = () => {
     const projName = $('#section_names input#project_name').val();
-    const domName = $('#section_names input#domain_name').val();
-    const ingName = $('#section_names input#name').val();
+    const dom = $('#section_names input#domain').val();
     const nameArea = $('#ingestion-names');
     if (projName || ingName) {
         nameArea.removeClass();
         nameArea.html('');
         nameArea.append($('<span>' + projName + '</span>'));
-        if (domName) {
-            nameArea.append($('<span>' + domName + '</span>'));
-        }
-        nameArea.append($('<span>' + ingName + '</span>'));
+        nameArea.append($('<span>' + dom + '</span>'));
         $('#section_description').removeClass('new matched initiated');
-        const match = ingestions.find((e) => { return e.pipeline.project_name === projName && e.pipeline.domain_name === domName && e.pipeline.name === ingName; });
+        const match = ingestions.find((e) => { return e.pipeline.project_name === projName && e.pipeline.domain === dom; });
         if (match) {
             thisIngestion = JSON.parse(JSON.stringify(match));
             console.log('we found a match', thisIngestion);
@@ -50,8 +46,7 @@ const initiateIngestion = () => {
         } else {
             clearFormData();
             thisIngestion.pipeline.project_name = projName;
-            thisIngestion.pipeline.domain_name = domName;
-            thisIngestion.pipeline.name = ingName;
+            thisIngestion.pipeline.domain = dom;
             console.log('brand new ingestion', thisIngestion);
             $('#section_description').addClass('initiated');
             $('#section_description').addClass('new');

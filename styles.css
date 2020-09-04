@@ -20,7 +20,26 @@ h3 {
 }
 i:hover,
 button:hover {
+    cursor: pointer;
     opacity: 0.9;
+}
+.i-button {
+    background: #4ec8eb;
+    border: 0;
+    border-radius: 5px;
+    padding: 3px 10px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1em;
+}
+.i-button.dark-gray {
+    background: #818387;
+}
+.i-button.green {
+    background: #43b02a;
+}
+.i-button i {
+    color: #fff;
 }
 .inbody-info {
     font-size: 0.9em;
@@ -37,6 +56,9 @@ button:hover {
 }
 .dark-gray {
     color: #646469;
+}
+.light-blue {
+    color: #4ec8eb;
 }
 /* action buttons on bottom */
 .actions {
@@ -125,17 +147,21 @@ header {
     content: "\f105";
     margin: 0 5px;
 }
-#project-options {
+.drop-options {
     display: none;
     position: absolute;
     background: #fff;
     border: 1px solid #d9d9d6;
     width: 398px;
+    max-height: 200px;
+    overflow-y: scroll;
+    margin-top: 1px;
+    border-radius: 5px
 }
-#project-options .option {
+.drop-options .option {
     padding: 5px 10px;
 }
-#project-options .option:hover {
+.drop-options .option:hover {
     cursor: pointer;
     background: #4ec8eb;
     color: #fff;
@@ -210,18 +236,20 @@ label.required:after {
 }
 /* define */
 #section_description h3.match {
-    color: #ee2737;
     display: none;       
+}
+#section_description h3.match b {
+    color: #ee2737; 
 }
 #section_description.matched h3.match {
     display: block;
 }
 .tags {
-    display: inline-grid;
-    grid-template-columns: auto auto;
+    /*display: inline-grid;
+    grid-template-columns: auto auto;*/
 }
 .selected-tags {
-    margin-left: 15px;
+    margin-bottom: 15px;
 }
 .selected-tags .tag-ticket,
 .selected-schema-fields .schema-ticket {
@@ -257,18 +285,26 @@ label.required:after {
     color: #fff;
 }
 .add-tag {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     font-size: 1em;
 }
-.add-tag span {
+.add-tag > div {
     margin-right: 10px;
 }
-.add-tag input[type="text"] {
+.add-tag input[type="text"],
+.add-tag select {
     min-width: 100px;
 }
-.add-tag i,
-.add-schema i {
-    font-size: 1.5em;
-    color: #4ec8eb;
+.add-tag .relative {
+    display: inline-block;
+}
+.add-tag i {
+    font-size: 2em;
+}
+.add-tag .drop-options {
+    width: calc(100% - 2px);
 }
 /* source location */
 #loc-dependencies .loc-dep {
@@ -297,41 +333,17 @@ label.required:after {
 .delimiters {
     display:none;
 }
-/* schema table */
-#schema-table {
-    margin: 15px 0;
+/* schema fields */
+#edit-schema {
+    margin-top: 15px;
 }
-#schema-table th,
-#schema-table td {
-    text-align: left;
-    width: 200px;
-    min-width: auto;
-}
-#schema-table th {
-    padding-left: 11px;
-}
-#schema-table .nnpi {
-    width: 100px;
-}
-#schema-table .actions {
-    width: 50px;
-    text-align: center;
-    font-size: 1.6em;
-}
-#schema-table input,
-#schema-table select {
-    width: 100%;
-    min-width: auto;
-}
-.add-schema {
-    cursor: pointer;
-    margin: 10px 0;
-}
-.add-schema i {
-    font-size: 1.2em;
-}
-#schema-table {
+#edit-schema button.add,
+#edit-schema button.edit {
     display: none;
+}
+#edit-schema.add button.add,
+#edit-schema.edit button.edit {
+    display: inline-block;
 }
 .sample-upload div {
     position: relative;
@@ -354,20 +366,58 @@ label.required:after {
 /* review page */
 #review_worksheet {
     display: inline-grid;
-    grid-template-columns: 200px 500px; 
+    grid-template-columns: auto auto; 
 }
 #review_worksheet .section-name {
     grid-column-start: 1; 
     grid-column-end: 3;
     background: #002f6c;
     color: #fff;
-    padding: 5px 10px;
-    text-transform: uppercase;
+    padding: 10px 10px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+#review_worksheet #section-1.section-name {
+    margin-top: 0;
 }
 #review_worksheet .label,
 #review_worksheet .value {
-    padding: 5px 10px;
+    padding: 10px 10px;
     border-bottom: 1px solid #d9d9d6;
+}
+#review_worksheet .last-field {
+    border-bottom: 0;
+}
+#review_worksheet .label {
+}
+#review_worksheet .value {
+    color: #818387;
+}
+#review_worksheet .val-obj {
+    background: #818387;
+    color: #fff;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 3px 5px;
+    margin: 0 2px 0 0;
+}
+#review_worksheet .val-obj.extra,
+#review_worksheet .hide,
+#review_worksheet .show-all .show  {
+    display: none;
+}
+#review_worksheet .show-all .val-obj.extra,
+#review_worksheet .show-all .hide {
+    display: inline-block;
+}
+#review_worksheet .val-obj .prop:not(:first-child) {
+    margin-left:5px;
+}
+#review_worksheet .val-obj .prop:not(:first-child):before {
+    content: "[";
+}
+#review_worksheet .val-obj .prop:not(:first-child):after {
+    content: "]";
 }
 /* clear storage link */
 .clear-storage {

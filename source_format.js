@@ -11,33 +11,14 @@ const buildSchemaFields = () => {
 };
 
 /**
- * add new schema field row in table
+ * add new schema field (no id passed in) or edit existing one (id passed in)
  */
 const editSchemaField = (id) => {
-    editedSchemaField = id ? thisIngestion.source.schema_fields.find((e) => { return parseInt(e.id) === parseInt(id); }) : {name:'',type:'',nnpi:'false',id:Math.floor(Math.random() * 1001)};
-    schemaEditMode = id ? 'edit' : 'add';
-    const schemaTable = $('#schema-table tbody tr');
-    let options;
-    schemaTable.html('');
-    schemaTypes.map((type) => {
-        options += '<option value="' + type.value + '">' + type.name + '</option>';
-    });
-    const types = (id) => {
-        return '<select id="schema_type" name="schema_type" onChange="editedSchemaField.type = $(this).val()">' + options + '</select>';
-    };
-    const nnpi = (id) => {
-        return '<select id="schema_nnpi" name="schema_nnpi" onChange="editedSchemaField.nnpi = $(this).val()"><option value="true">Yes</option><option value="false">No</option></select>';
-    };
-    let row = $('<td class="name"><input name="name" type="text" value="' + editedSchemaField.name + '" onBlur="editedSchemaField.name = $(this).val()" /></td>' +
-                '<td class="type">' + types(editedSchemaField.id) + '</td>' + 
-                '<td class="nnpi">' + nnpi(editedSchemaField.id) + '</td>' + 
-                '<td class="actions"><i class="far fa-check-circle pointer green" onClick="updateSchemaFieldData(\'' + editedSchemaField.id + '\')" title="Done"></i> <i class="far fa-times-circle pointer dark-gray" onClick="cancelEditSchema()" title="Cancel"></i></td>');    
-    schemaTable.append(row);
-    $('#schema-table').show();
-    $('.type select', schemaTable).val(editedSchemaField.type);
-    $('.nnpi select', schemaTable).val(editedSchemaField.nnpi);
-    console.log('this row type', $('.type select', schemaTable).val());
-    console.log('this row nnpi', $('.nnpi select', schemaTable).val());
+    editedSchemaField = id ? thisIngestion.source.schema_fields.find((e) => { return parseInt(e.id) === parseInt(id); }) : emptySchemaField;
+    updateSchemaClass(id ? 'edit' : 'add');
+    $('#schema_name').val(editedSchemaField.name);
+    $('#schema_type').val(editedSchemaField.type);
+    $('#schema_nnpi').val(editedSchemaField.nnpi);
 };
 
 /**
@@ -55,7 +36,7 @@ const deleteSchemaField = (id) => {
  * update the ingestion schema fields data of selected schema or add newly created one to list
  */
 const updateSchemaFieldData = (id) => {
-    if (schemaEditMode === 'add') {
+    if (!id) {
         thisIngestion.source.schema_fields.push(editedSchemaField);
     } else {
         thisSchema = thisIngestion.source.schema_fields.find((e) => { return parseInt(e.id) !== parseInt(id); });
@@ -63,14 +44,26 @@ const updateSchemaFieldData = (id) => {
     }
     schemaFields = thisIngestion.source.schema_fields;
     buildSchemaFields();
-    editedSchemaField = {};
-    $('#schema-table').hide();
+    clearSchemaInputs();
 };
 
 /**
- * cancel edits to schema field
+ * cancel edits to schema and clear input fields
  */
- const cancelEditSchema = () => {
-    editedSchemaField = {};
-    $('#schema-table').hide();
- }
+ const clearSchemaInputs = () => {
+    $('#schema_name').val('');
+    $('#schema_type').val('');
+    $('#schema_nnpi').val('');
+    updateSchemaClass('add')
+ };
+
+ // update CSS class around edit schema fields
+ const updateSchemaClass = (status) => {
+    console.log('status', status);
+    const edSc = $('#edit-schema');
+    if (status === 'edit') {
+        edSc.removeClass('add').addClass('edit');
+    } else {
+        edSc.removeClass('edit').addClass('add');
+    }
+ };

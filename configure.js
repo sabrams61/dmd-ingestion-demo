@@ -3,15 +3,21 @@ let ingestions = [
     {
         "id": 1,
         "pipeline": {
-            "name": "Leads",
-            "project_name": "Marketing",
-            "domain_name": "",
+            "project_name": "Leads",
+            "domain": "Marketing",
             "sourceid": 1,
             "targetid": 1,
             "scheduleid": 1,
             "owner_email": "sabrams61@massmutual.com",
             "comments": "this is a default ingestion already included for testing purposes",
-            "tags": [1, 3]
+            "tags": [
+                {id:1,name:'T-Code',value:'8780BG'},
+                {id:2,name:'G-Code',value:'43300'},
+                {id:3,name:'IP Address',value:'123.456.90.65'},
+                {id:4,name:'Connector',value:'G-7'},
+                {id:5,name:'System',value:'Verizon'},
+                {id:6,name:'Start Date',value:'08-23-19'}
+            ]
         },
         "source": {
             "id": 1,
@@ -39,6 +45,30 @@ let ingestions = [
                     "id" : 2,
                     "name": "DOB",
                     "type": "date",
+                    "nnpi": "false"
+                },
+                {
+                    "id": 3,
+                    "name": "First Name",
+                    "type": "text",
+                    "nnpi": "false"
+                },
+                {
+                    "id" : 4,
+                    "name": "Last Name",
+                    "type": "text",
+                    "nnpi": "true"
+                },
+                {
+                    "id": 5,
+                    "name": "City",
+                    "type": "text",
+                    "nnpi": "false"
+                },
+                {
+                    "id" : 6,
+                    "name": "State",
+                    "type": "text",
                     "nnpi": "false"
                 }
             ],
@@ -87,8 +117,8 @@ let idCount = ingestions.length + 1;
 const LOCAL_STORAGE_KEY = 'dmd_demo';
 // current section index
 let currentSectionIndex = 0;
-// current project names
-let projectNames = [
+// current domain names
+let domainNames = [
     {name:'Marketing', value:'marketing'},
     {name:'Sales', value:'sales'},
     {name:'Life Insurance', value:'life_insurance'},
@@ -101,92 +131,73 @@ let projectNames = [
 let thisLoc = null;
 // for schema fields table
 let schemaFields = [];
-// let schemaFields = []
-//     {
-//         id: 1,
-//         name: 'SSN',
-//         type: 'taxid',
-//         nnpi: 'true'
-//     },
-//     {
-//         id: 2,
-//         name: 'DOB',
-//         type: 'date',
-//         nnpi: 'false'
-//     }
-// ];
 
 // object to be used for creating new schema field
 let editedSchemaField = {};
 // set to either 'add' or 'edit'
 let schemaEditMode = 'add';
+// empty schema field
+const emptySchemaField =  {
+    name : '',
+    type : '',
+    nnpi : 'false',
+    id : Math.floor(Math.random() * 1001)
+};
 
 // static list of tags user can choose from when describing the Ingestion
 let tagOptions = [
     {
         id : 1,
-        name : 'A-Code',
-        value : 'Alpha'
+        name : 'A-Code'
     },
     {
         id : 2,
-        name : 'B-Code',
-        value : 'Beta'
+        name : 'B-Code'
     },
     {
         id : 3,
-        name : 'C-Code',
-        value : 'Chi'
+        name : 'C-Code'
     },
     {
         id : 4,
-        name : 'D-Code',
-        value : 'Delta'
+        name : 'D-Code'
     },
     {
         id : 5,
-        name : 'E-Code',
-        value : 'Epsilon'
+        name : 'E-Code'
     },
     {
         id : 6,
-        name : 'F-Code',
-        value : 'Phi'
+        name : 'F-Code'
     },
     {
         id : 7,
-        name : 'G-Code',
-        value : 'Gamma'
+        name : 'G-Code'
     },
     {
         id : 8,
-        name : 'H-Code',
-        value : 'Eta'
+        name : 'H-Code'
+    },
+    {
+        id : 9,
+        name : 'I-Code'
+    },
+    {
+        id : 10,
+        name : 'K-Code'
     },
     {
         id : 11,
         name : 'T-Code',
-        value : "Tau"
-    },
-    {
-        id : 9,
-        name : 'I-Code',
-        value : 'Iota'
-    },
-    {
-        id : 10,
-        name : 'K-Code',
-        value : 'Kappa'
     }
 ];
-// all available tags
-let availableTags = [...tagOptions];
 // selected tags in this ingestion
 let selectedTags = [];
 
 // static list of source locations
 const sourceLocations = [
     {
+        id: 1,
         name : 'S3',
         value : 's3',
         loc_dependencies : [
@@ -200,61 +211,66 @@ const sourceLocations = [
             }
         ],
         format_dependencies : [
-            {name:'Delimited', value:'delimited'}, 
-            {name:'Fixed', value:'fixed'}, 
-            {name:'Parquet', value:'parquet'},
-            {name:'XML', value:'xml'},
-            {name:'JSON', value:'json'}
+            {id:1,name:'Delimited', value:'delimited'}, 
+            {id:2,name:'Fixed', value:'fixed'}, 
+            {id:3,name:'Parquet', value:'parquet'},
+            {id:4,name:'XML', value:'xml'},
+            {id:5,name:'JSON', value:'json'}
         ]
     },
     {
+        id: 2,
         name : 'Database',
         value : 'db',
         loc_dependencies : [
             {
+                id : 1,
                 label : 'Database  Schema',
                 name : 'database_schema'
             },
             {
+                id : 2,
                 label : 'Database Table',
                 name : 'database_table'
             }
         ],
         format_dependencies : [
-            {name:'Relational', value:'relational'},
-            {name:'Relational XML', value:'relational_xml'},
-            {name:'Relational JSON', value:'relational_json'}
+            {id:6,name:'Relational', value:'relational'},
+            {id:7,name:'Relational XML', value:'relational_xml'},
+            {id:8,name:'Relational JSON', value:'relational_json'}
         ]
     }
 ];
 
 const delimiterOptions =  [
-    {name:'Comma', value:'comma', example: ','},
-    {name:'Colon', value:'colon', example: ':'}, 
-    {name:'Tab', value:'tab', example: '&nbsp;&nbsp;&nbsp;&nbsp;'}
+    {id:1,name:'Comma', value:'comma', example: ','},
+    {id:2,name:'Colon', value:'colon', example: ':'}, 
+    {id:3,name:'Tab', value:'tab', example: '&nbsp;&nbsp;&nbsp;&nbsp;'}
 ];
 
 const encodingOptions = [
-    {name:'UTF8', value:'utf8'},
-    {name:'UTF16', value:'utf16'},
-    {name:'ascii', value:'ascii'}
+    {id:1,name:'UTF8', value:'utf8'},
+    {id:2,name:'UTF16', value:'utf16'},
+    {id:3,name:'ascii', value:'ascii'}
 ];
 
 const schemaTypes = [
-    {name:'Text', value:'text'},
-    {name:'Currency', value:'currency'},
-    {name:'Decimal', value:'decimal'}, 
-    {name:'Date', value:'date'}, 
-    {name:'Timestamp', value:'timestamp'}, 
-    {name:'Tax ID', value:'taxid'}
+    {id:1,name:'Text', value:'text'},
+    {id:2,name:'Currency', value:'currency'},
+    {id:3,name:'Decimal', value:'decimal'}, 
+    {id:4,name:'Date', value:'date'}, 
+    {id:5,name:'Timestamp', value:'timestamp'}, 
+    {id:6,name:'Tax ID', value:'taxid'}
 ];
 
 const targetLocations = [
     {
+        id : 1,
         name : 'Enterprise Data Warehouse',
         value : 'edw'
     },
     {
+        id : 2,
         name : 'Data Lake',
         value : 'datalake'
     }
@@ -284,21 +300,14 @@ const reviewWorksheet = {
                     type: 'text'
                 },
                 {
-                    name: 'Domain Name',
-                    field_key: 'domain_name',
+                    name: 'Domain',
+                    field_key: 'domain',
                     type: 'text'
                 },
                 {
-                    name: 'Ingestion Name',
-                    field_key: 'name',
+                    name: 'Ingestion Owner Email',
+                    field_key: 'owner_email',
                     type: 'text'
-                },
-                {
-                    name: 'Tags',
-                    field_key: 'tags',
-                    type: 'object-array-mult',
-                    get_values_from: selectedTags,
-                    properties: ['name', 'value']
                 },
                 {
                     name: 'Description',
@@ -306,9 +315,11 @@ const reviewWorksheet = {
                     type: 'text'
                 },
                 {
-                    name: 'Ingestion Owner\'s Email',
-                    field_key: 'owner_email',
-                    type: 'text'
+                    name: 'Tags',
+                    field_key: 'tags',
+                    type: 'object-array-mult-obj',
+                    get_values_from: selectedTags,
+                    properties: ['name', 'value']
                 }
             ]
         },
@@ -385,7 +396,7 @@ const reviewWorksheet = {
                 {
                     name: 'Schema Fields',
                     field_key: 'schema_fields',
-                    type: 'object-array-obj-mult',
+                    type: 'object-array-mult-obj',
                     get_values_from: schemaFields,
                     properties: ['name']
                 },

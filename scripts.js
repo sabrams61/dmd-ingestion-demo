@@ -44,8 +44,8 @@ const init = () => {
 const resetThisIngestion = () => {
     thisIngestion = {
         id : idCount,
-        pipeline : {},
-        source : {},
+        pipeline : {tags:[]},
+        source : {schema_fields:[]},
         target : {},
         schedule : {}
     }
@@ -63,16 +63,7 @@ const clearFormData = () => {
     $('textarea').val('');
     $('input[type="checkbox"]').prop('checked', false);
     $('input[type="radio"]').prop('checked', false);
-    allTags = allTags.concat(selectedTags);
     selectedTags = [];
-    buildTagsChoiceList();
-    schemaFields = [{
-        id : 1,
-        name : '',
-        type : '',
-        nnpi : ''
-    }];
-    $('#schema-table tbody').html('');
     showUnPw(false);
     $('#loc-dependencies').html('');
     $('#format-options-box').html('');
@@ -121,15 +112,13 @@ const changeSection = (direction, goto) => {
 const fillOutFormFromData = () => {
     // names
     $('#section_names #project_name').val(thisIngestion.pipeline.project_name);
-    $('#section_names #domain_name').val(thisIngestion.pipeline.domain_name);
-    $('#section_names #name').val(thisIngestion.pipeline.name);
+    $('#section_names #domain').val(thisIngestion.pipeline.domain);
     // description
     if (!!thisIngestion.pipeline.tags) {
-        thisIngestion.pipeline.tags.map((tagVal) => {
-            updateTags(tagVal, true, true);
+        thisIngestion.pipeline.tags.map((tag) => {
+            updateTags(tag, true);
         });
     }
-    buildTagsChoiceList();
     $('#section_description #comments').val(thisIngestion.pipeline.comments);
     $('#section_description #owner_email').val(thisIngestion.pipeline.owner_email);
     // source location
@@ -170,14 +159,21 @@ const fillOutFormFromData = () => {
  */
 const buildReview = () => {
     const rev = $('#review_worksheet');
+    let thisCnt = 0;
     rev.html('');
-    reviewWorksheet.sections.map((section) => {
-        let secName = $('<div class="section-name">' + section.name + '</div>');
+    reviewWorksheet.sections.map((section, secCnt) => {
+        let secName = $('<div id="section-' + (secCnt + 1) + '" class="section-name">' + section.name + '</div>');
         let dataSec = thisIngestion[section.section_key];
         rev.append(secName);
-        section.fields.map((field) => {
-            let fieldName = $('<div class="label">' + field.name + '</div>');
-            let fieldVal = $('<div class="value"></div>');            
+        section.fields.map((field, fieldCnt) => {
+            const unFieldName = field.name.replace(/ /g, '_').toLowerCase();
+            const fieldName = $('<div class="label" id="review_label_' + unFieldName + '">' + field.name + '</div>');
+            const fieldVal = $('<div class="value" id="review_value_' + unFieldName + '"></div>');
+            const maxArrLen = 5; // maximum number of array values to show initially 
+            if (section.fields.length === fieldCnt + 1) {
+                fieldName.addClass('last-field');
+                fieldVal.addClass('last-field');
+            }
             switch (field.type) {
                 case 'text':
                     fieldVal.text(dataSec[field.field_key]);
@@ -199,17 +195,43 @@ const buildReview = () => {
                         fieldVal.text(thisObj.name);
                     }
                     break;
-                case 'object-array-obj-mult':
+                case 'object-array-mult-id':
                     console.log('field key, value', field.field_key, dataSec[field.field_key]);
                     let thisArr = dataSec[field.field_key];
-                    console.log('thisArr', thisArr);
-                    thisArr.map((obj) => {
-                        let thisObj = $('<span class="val-obj"></span>');
+                    thisArr.map((id) => {
+                        let thisObj = field.get_values_from.find((e) => { return e.id === id; });
+                        let thisItem = $('<span class="val-obj"></span>');
                         field.properties.map((prop) => {
-                            thisObj.append($('<span class="prop">' + obj[prop] + '</span>'));
-                        }); 
-                        fieldVal.append(thisObj);
+                            thisItem.append($('<span class="prop">' + thisObj[prop] + '</span>'));
+                        });
+                        if (valCnt >= maxArrLen) {
+                            thisItem.addClass('extra');
+                        }
+                        fieldVal.append(thisItem);
                     });
+                    if (thisArr.length > maxArrLen) {
+                        fieldVal.append($('<button class="i-button" onClick="showAllValues(\'' + unFieldName + '\')" title="Show All Values"><i class="fas fa-plus"></i> ' + (thisArrObj.length - maxArrLen) + '</button>'));
+                        fieldVal.append($('<button class="i-button hide" onClick="showAllValues(\'' + unFieldName + '\')" title="Shrink Values"><i class="fas fa-angle-left"></i> Shrink</button>'));
+                    }
+                    break;
+                case 'object-array-mult-obj':
+                    console.log('field key, value', field.field_key, dataSec[field.field_key]);
+                    let thisArrObj = dataSec[field.field_key];
+                    console.log('thisArrObj', thisArrObj);
+                    thisArrObj.map((obj, valCnt) => {
+                        let thisItem = $('<span class="val-obj"></span>');
+                        field.properties.map((prop) => {
+                            thisItem.append($('<span class="prop">' + obj[prop] + '</span>'));
+                        }); 
+                        if (valCnt >= maxArrLen) {
+                            thisItem.addClass('extra');
+                        }
+                        fieldVal.append(thisItem);
+                    });
+                    if (thisArrObj.length > maxArrLen) {
+                        fieldVal.append($('<button class="i-button show" onClick="showAllValues(\'' + unFieldName + '\')" title="Show All Values"><i class="fas fa-plus"></i> ' + (thisArrObj.length - maxArrLen) + '</button>'));
+                        fieldVal.append($('<button class="i-button hide" onClick="showAllValues(\'' + unFieldName + '\')" title="Shrink Values"><i class="fas fa-angle-left"></i> Shrink</button>'));
+                    }
                     break;
                 default:
                     fieldVal.text('hello');

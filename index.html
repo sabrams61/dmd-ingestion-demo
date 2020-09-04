@@ -35,6 +35,7 @@
             </div>
         </header>
 
+        <!-- to display current ingestion names or other messages -->
         <div id="ingestion-names"></div>
 
         <sections>
@@ -46,27 +47,22 @@
                     <input autocomplete="off" name="hidden" type="text" style="display:none;">
                     <div class="form-groups last">
                         <!-- project name -->
-                        <div class="form-group relative">
+                        <div class="form-group">
                             <label class="required">Project Name</label>
-                            <input type="text" name="project_name" id="project_name" onKeyup="filterProjectOptions(this.value)" onFocus="$('#project-options').show()" onBlur="thisIngestion.pipeline.project_name = this.value;" value="Marketing" />
-                            <div id="project-options" class="project-options">
+                            <input type="text" name="project_name" id="project_name" onBlur="thisIngestion.pipeline.project_name = this.value;" value="Leads" />
+                        </div>
+                        <!-- domain -->
+                        <div class="form-group relative">
+                            <label>Domain</label>
+                            <input type="text" name="domain" id="domain" onKeyup="filterDomainOptions(this.value)" onFocus="$('#domain-options').show()" onBlur="thisIngestion.pipeline.domain = this.value" value="Marketing" />
+                            <div id="domain-options" class="drop-options">
                                 <script>
-                                    projectNames.map((option) => {
-                                        let opt = '<div class="option" onClick="setProjectName(\'' + option.name + '\')">' + option.name + '</div>';
-                                        $('#project-options').append(opt);
+                                    domainNames.map((option) => {
+                                        let opt = '<div class="option" onClick="setDomain(\'' + option.name + '\')">' + option.name + '</div>';
+                                        $('#domain-options').append(opt);
                                     });
                                 </script>
                             </div>
-                        </div>
-                        <!-- domain name -->
-                        <div class="form-group">
-                            <label>Domain Name</label>
-                            <input type="text" name="domain_name" id="domain_name" onBlur="thisIngestion.pipeline.domain_name = this.value" />
-                        </div>
-                        <!-- ingestion name -->
-                        <div class="form-group">
-                            <label class="required">Ingestion Name</label>
-                            <input type="text" name="name" id="name" onBlur="thisIngestion.pipeline.name = this.value" value="Leads" />
                         </div>
                     </div>
                     <div class="actions">
@@ -79,27 +75,15 @@
             <!-- section 2: description -->
             <section id="section_description">
                 <!-- <h3 class="new">Please select at least one tag and include some brief comments to describe the use for this Ingestion.</h3> -->
-                <h3 class="match">We have found an existing Ingestion that has matches the names you entered and has already been scheduled. Please evaluate the tags, description and email below. If this is the correct Ingestion you are looking for, you may edit them and continue.<br /><br />
-                If you do not wish to edit this Ingestion, please return to previous screen and submit again.</h3>
-                <form name="description" onSubmit="return false;">
-                    <!-- tags -->
+                <h3 class="match"><b>Note:</b> We have found an existing Ingestion that has matches the names you entered and has already been scheduled. Please evaluate the tags, description and email below. If this is the correct Ingestion you are looking for, you may edit them and continue. If you do not wish to edit this Ingestion, please return to previous screen and submit again.</h3>
+                <form autocomplete="off" name="description" onSubmit="return false;">
+                    <input autocomplete="off" name="hidden" type="text" style="display:none;">
+                    <!-- owners email -->
                     <div class="form-groups">
                         <div class="form-group">
-                            <label class="required">Tags (select at least one)</label>
-                            <div class="tags">
-                                <div class="tag-choices-box">
-                                    <select id="tag-choices" size="5" onChange="updateTags($(this).val(), true)"></select>
-                                </div>
-                                <div id="selected-tags" class="selected-tags"></div>
-                            </div>
-                            <script>buildTagsChoiceList()</script>
-                            <div class="add-tag">
-                                <p>Add a new tag:</p>
-                                <p>
-                                    <span>Name: <input type="text" id="add-tag-name" name="add-tag-name" /></span>
-                                    <span>Value: <input type="text" id="add-tag-value" name="add-tag-value" /></span>
-                                    <i class="fas fa-plus-square pointer" onClick="addNewTag()"></i>
-                                </p>
+                            <label class="required">Ingestion Owner Email</label>
+                            <div>
+                                <input type="email" name="owner_email" id="owner_email" onBlur="thisIngestion.pipeline.owner_email = this.value" />
                             </div>
                         </div>
                     </div>
@@ -110,12 +94,33 @@
                             <textarea id="comments" name="comments" onBlur="thisIngestion.pipeline.comments = this.value"></textarea>
                         </div>
                     </div>
-                    <!-- owners email -->
+                    <!-- tags -->
                     <div class="form-groups last">
                         <div class="form-group">
-                            <label class="required">Ingestion Owner's Email</label>
-                            <div>
-                                <input type="email" name="owner_email" id="owner_email" onBlur="thisIngestion.pipeline.owner_email = this.value" />
+                            <label class="required">Tags (type or select)</label>
+                            <div class="tags">
+                                <div id="selected-tags" class="selected-tags"></div>
+                                <div class="add-tag">
+                                    <div>
+                                        Name:
+                                        <span class="relative">
+                                            <input type="text" name="add-tag-name" id="add-tag-name" onKeyup="filterTagOptions(this.value)" onFocus="$('#tag-options').show()" onBlur="selectTag($(this).val())" />
+                                            <div id="tag-options" class="drop-options">
+                                                <script>
+                                                    tagOptions.map((option  ) => {
+                                                        let opt = '<div class="option" onClick="selectTag(\'' + option.name + '\')">' + option.name + '</div>';
+                                                        $('#tag-options').append(opt);
+                                                    });
+                                                </script>
+                                            </div>
+                                        </span>
+                                    </div>
+                                    <div>Value: <input type="text" id="add-tag-value" name="add-tag-value" /></div>
+                                    <div>
+                                        <button class="i-button" onClick="addNewTag()" title="Add New Tag"><i class="fas fa-plus"></i></button>
+                                        <button class="i-button dark-gray" onClick="clearTagInputs()" title="Cancel"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -181,7 +186,8 @@
             <!-- section 4: source format -->
             <section id="section_source_format">
                 <!-- <h3>Enter the criteria for this data's current format</h3> -->
-                <form name="sourceFormat" onSubmit="return false;">                    
+                <form autocomplete="off" name="sourceFormat" onSubmit="return false;"> 
+                    <input autocomplete="off" name="hidden" type="text" style="display:none;">                   
                     <!-- sample file upload -->
                     <div class="form-groups">
                         <div class="form-group sample-upload">
@@ -229,23 +235,36 @@
                         <div class="form-group">
                             <label>Schema Fields</label>
                             <div id="selected-schema-fields" class="selected-schema-fields"></div>
-                            <div class="add-schema" onClick="editSchemaField()"><i class="fas fa-plus-square pointer"></i> Add a new schema field</div>
-                            <table id="schema-table" class="table">
-                                <thead>
-                                    <th class="name">Name</th>
-                                    <th class="type">Type</th>
-                                    <th class="nnpi">NNPI</th>
-                                    <th class="actions"></th>
-                                </thead>
-                                <tbody>
-                                    <tr id="schema_">
-                                        <!-- <td class="name"><input id="schema_name" name="name" type="text" /></td>
-                                        <td class="type">' + types(schema.id) + '</td>
-                                        <td class="nnpi">' + nnpi(schema.id) + '</td>
-                                        <td class="actions"><i class="far fa-check-circle pointer " onClick="updateSchemaFields(\'' + schema.id + '\')" title="Delete"></i></td> -->
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div id="edit-schema" class="add-tag add">
+                                <div>
+                                    Name:
+                                    <input id="schema_name" name="schema_name" type="text" value="" onBlur="editedSchemaField.name = $(this).val()" />
+                                </div>
+                                <div>
+                                    Type: 
+                                    <select id="schema_type" name="schema_type" onChange="editedSchemaField.type = $(this).val()">
+                                        <option value="">-- select --</option>
+                                    </select>
+                                    <script>
+                                        schemaTypes.map((type) => {
+                                            $('#schema_type').append($('<option value="' + type.value + '">' + type.name + '</option>'));
+                                        });
+                                    </script>
+                                </div>
+                                <div>
+                                    NNPI: 
+                                    <select id="schema_nnpi" name="schema_nnpi" onChange="editedSchemaField.nnpi = $(this).val()">
+                                        <option value="">-- select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <button class="i-button edit green" onClick="updateSchemaFieldData(editedSchemaField.id)" title="Update Schema Field"><i class="fas fa-check"></i></button>
+                                    <button class="i-button add" onClick="updateSchemaFieldData()" title="Add New Schema Field"><i class="fas fa-plus"></i></button>
+                                    <button class="i-button dark-gray" onClick="clearSchemaInputs()" title="Cancel"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="actions">

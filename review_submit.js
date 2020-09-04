@@ -21,3 +21,8 @@ const completeIngestion = () => {
     changeSection(null, 0);
     $('.breadcrumb li:not(.names)').hide();
 };
+
+const showAllValues = (fieldName) => {
+    const valList = $('#review_value_' + fieldName);
+    valList.hasClass('show-all') ? valList.removeClass('show-all') : valList.addClass('show-all');
+};
