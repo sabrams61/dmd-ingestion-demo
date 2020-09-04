@@ -305,7 +305,7 @@ label.required:after {
     display: inline-block;
 }
 .add-tag i {
-    font-size: 2em;
+    font-size: 1.5em;
 }
 .add-tag .drop-options {
     width: calc(100% - 2px);
@@ -403,7 +403,7 @@ label.required:after {
     border-radius: 5px;
     display: inline-block;
     padding: 3px 5px;
-    margin: 0 2px 0 0;
+    margin: 1px 2px 1px 0;
 }
 #review_worksheet .val-obj.extra,
 #review_worksheet .hide,
